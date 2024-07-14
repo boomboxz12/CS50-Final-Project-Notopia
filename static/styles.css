@@ -62,6 +62,7 @@ input
     padding: 0 10px;
     accent-color: #d7cc40;
     border: 0;
+    display: inline-block;
 }
 
 .title 
@@ -71,6 +72,34 @@ input
     font-weight: 200;
     font-style: normal;
     font-size: 6rem;
+    margin: 0 auto;
+    width: 0%;
+    overflow-x: clip;
+    white-space: nowrap;
+    animation: 
+        typewriter 1.5s steps(40, end) 0.5s forwards,
+        blinking-cursor 0.5s steps(2, jump-none) 0.5s infinite alternate;
+    border-right: 2px solid rgba(214, 203, 64, 1);
+}
+
+.title.login
+{
+    max-width: 532px;
+}
+
+.title.logout
+{
+    max-width: 458px;
+}
+
+.title.signup
+{
+    max-width: 276px;
+}
+
+.title-wrapper
+{
+    overflow-y: visible;
 }
 
 .text
@@ -80,10 +109,39 @@ input
     font-style: normal;
 }
 
-@media only screen and (max-width: 576px)
+.btn-success
+{
+    width: 300px;
+    border-radius: 10px;
+}
+
+@keyframes typewriter
+{
+    from {width: 0%;}
+    to {width: 100%;}
+}
+
+@keyframes blinking-cursor {
+    from {border-right: 2px solid rgba(214, 203, 64, 0);}
+    to {border-right: 2px solid rgba(214, 203, 64, 1);}
+}
+
+@media only screen and (max-width: 682px)
 {
     .title
     {
         font-size: 3rem;
+    }
+    .title.login
+    {
+    max-width: 268px;
+    }
+    .title.logout
+    {
+    max-width: 232px;
+    }
+    .title.signup
+    {
+    max-width: 142px;
     }
 }

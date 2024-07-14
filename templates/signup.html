@@ -5,13 +5,15 @@
 {% endblock %}
 
 {% block main %}
-<h1 class="title">Join us!</h1>
+<div class="title-wrapper"><h1 class="title signup">Join us!</h1></div>
 <form action="/signup" method="post">
     <p class="input-label text">Username</p>
-    <input autocomplete="off" type="text" placeholder="Username" name="username">
+    <input required autocomplete="off" type="text" placeholder="Username" name="username">
     <p class="input-label text">Password</p>
-    <input autocomplete="off" type="password" placeholder="Password" name="password">
+    <input required autocomplete="off" type="password" placeholder="Password" name="password">
     <p class="input-label text">Confirm password</p>
-    <input autocomplete="off" type="password" placeholder="Confirm password" name="confirmation">
+    <input required autocomplete="off" type="password" placeholder="Confirm password" name="confirmation">
+    <p></p>
+    <input class="btn btn-success" type="submit" value="Signup">
 </form>
 {% endblock %}
