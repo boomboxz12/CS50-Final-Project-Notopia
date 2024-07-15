@@ -11,6 +11,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "cachelib"
 Session(app)
 
+
 @app.after_request
 def after_request(response):
     """Ensure responses aren't cached"""
@@ -18,21 +19,6 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
-
-# # Preparing the sqlite3 databases for use
-# users_con = sqlite3.connect("users.db")
-# users_cur = users_con.cursor()
-# try:
-#     current_user_name = users_cur.execute("""
-#                                           SELECT *
-#                                           FROM users
-#                                           WHERE user_id = ?
-#                                           """,
-#                                           session["user_id"])
-#     notes_con = sqlite3.connect(f"{current_user_name}.db")
-#     notes_cur = notes_con.cursor()
-# except:
-#     pass
 
 
 @app.route("/")
@@ -52,6 +38,7 @@ def logout():
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
+
     # User reached route via POST
     if request.method == "POST":
         # Receive the user's information
@@ -65,14 +52,7 @@ def signup():
         if username in sql("users.db", """SELECT username
                                           FROM users""").fetchall()[0]:
             return apologize("signup", "Username already exists. Please choose another username.")
-
+        
+        # Check if the password is valid
 
     return render_template("signup.html")
-
-
-# # Close any open databases
-# users_con.close()
-# try:
-#     notes_con.close()
-# except:
-#     pass

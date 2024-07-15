@@ -5,15 +5,21 @@
 {% endblock %}
 
 {% block main %}
-<div class="title-wrapper"><h1 class="title signup">Join us!</h1></div>
+<div class="title-wrapper"><h1 class="title title-276">Join us!</h1></div>
 <form action="/signup" method="post">
-    <p class="input-label text">Username</p>
-    <input required autocomplete="off" type="text" placeholder="Username" name="username">
-    <p class="input-label text">Password</p>
-    <input required autocomplete="off" type="password" placeholder="Password" name="password">
-    <p class="input-label text">Confirm password</p>
-    <input required autocomplete="off" type="password" placeholder="Confirm password" name="confirmation">
-    <p></p>
-    <input class="btn btn-success" type="submit" value="Signup">
+    <label for="username" class="input-label text">Username</p>
+    <input id="username" required autocomplete="off" type="text" placeholder="Username" name="username">
+    <p id="username_warning" class="small-text"> </p>
+    <label for="password" class="input-label text">Password</p>
+    <input id="password" required autocomplete="off" type="password" placeholder="Password" name="password">
+    <p id="password_rules" class="small-text"> </p>
+    <label for="confirmation" class="input-label text">Confirm password</p>
+    <input id="confirmation" required autocomplete="off" type="password" placeholder="Confirm password" name="confirmation">
+    <p id="confirmation_warning" class="small-text"> </p>
+    <input id="submit" class="btn btn-success disabled" type="submit" value="Signup">
 </form>
+{% endblock %}
+
+{% block script %}
+    <script src="../static/signup.js"></script>
 {% endblock %}

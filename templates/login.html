@@ -5,12 +5,12 @@
 {% endblock %}
 
 {% block main %}
-    <div class="title-wrapper"><h1 class="title login">Welcome back!</h1></div>
+    <div class="title-wrapper"><h1 class="title title-532">Welcome back!</h1></div>
     <form action="/login" method="post">
-        <p class="input-label text">Username</p>
-        <input required autocomplete="off" type="text" placeholder="Username" name="username">
-        <p class="input-label text">Password</p>
-        <input required autocomplete="off" type="password" placeholder="Password" name="password">
+        <label for="username" class="input-label text">Username</p>
+        <input id="username" required autocomplete="off" type="text" placeholder="Username" name="username">
+        <label for="password" class="input-label text">Password</p>
+        <input id="password" required autocomplete="off" type="password" placeholder="Password" name="password">
         <p></p>
         <input class="btn btn-success" type="submit" value="Login">
     </form>

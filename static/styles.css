@@ -38,7 +38,17 @@ main
     margin-top: 1vw;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    justify-content: space-between;
+}
+
+.content > :first-child
+{
+    margin-top: 3vh;
+}
+
+.content > :last-child
+{
+    margin-bottom: 3vh;
 }
 
 .navbar
@@ -54,7 +64,7 @@ main
 
 input
 {
-    margin-bottom: 40px;
+    margin-bottom: 24px;
     height: 40px;
     width: calc(30vw + 100px);
     background-color: rgb(215, 215, 215);
@@ -82,19 +92,19 @@ input
     border-right: 2px solid rgba(214, 203, 64, 1);
 }
 
-.title.login
+.title.title-276
 {
-    max-width: 532px;
+    max-width: 276px;
 }
 
-.title.logout
+.title.title-458
 {
     max-width: 458px;
 }
 
-.title.signup
+.title.title-532
 {
-    max-width: 276px;
+    max-width: 532px;
 }
 
 .title-wrapper
@@ -111,8 +121,19 @@ input
 
 .btn-success
 {
-    width: 300px;
+    width: calc(15vw + 100px);
     border-radius: 10px;
+}
+
+label
+{
+    display: block;
+    margin-bottom: -10px;
+}
+
+.small-text
+{
+    font-size: 0.9rem;
 }
 
 @keyframes typewriter
@@ -132,16 +153,16 @@ input
     {
         font-size: 3rem;
     }
-    .title.login
+    .title.title-532
     {
-    max-width: 268px;
+        max-width: 268px;
     }
-    .title.logout
+    .title.title-458
     {
-    max-width: 232px;
+        max-width: 232px;
     }
-    .title.signup
+    .title.title-276
     {
-    max-width: 142px;
+        max-width: 142px;
     }
 }
