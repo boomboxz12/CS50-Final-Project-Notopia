@@ -7,11 +7,15 @@
 {% block main %}
     <div class="title-wrapper"><h1 class="title title-532">Welcome back!</h1></div>
     <form action="/login" method="post">
-        <label for="username" class="input-label text">Username</p>
+        <label for="username" class="input-label text">Username</label>
         <input id="username" required autocomplete="off" type="text" placeholder="Username" name="username">
-        <label for="password" class="input-label text">Password</p>
+        <label for="password" class="input-label text">Password</label>
         <input id="password" required autocomplete="off" type="password" placeholder="Password" name="password">
         <p></p>
-        <input class="btn btn-success" type="submit" value="Login">
+        <input id="submit" class="btn btn-success" disabled="disabled" tabindex="-1" aria-disabled="true" type="submit" value="Log in">
     </form>
+{% endblock %}
+
+{% block script %}
+    <script src="../static/login.js"></script>
 {% endblock %}

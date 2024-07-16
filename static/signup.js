@@ -1,11 +1,15 @@
-// Get username, password, and confirmation DOMs
+// Get the DOMs
 const username = document.getElementById("username");
 const password = document.getElementById("password");
 const confirmation = document.getElementById("confirmation");
 const submit = document.getElementById("submit");
+const passwordRules = "The password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, and one number."
 
 // Array for enabling the signup button upon passing all verifications
 var verifications = [0, 0, 0];
+
+// Regular expression for password
+var passRegex = /^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,})$/
 
 // Verify that a username was entered upon unfocusing the input field
 username.addEventListener("focusout", () => {
@@ -28,10 +32,17 @@ username.addEventListener("keyup", () => {
     }
 });
 
+// Inform the user about the password rules when they focus on the password field
+password.addEventListener('focusin', () => {
+    if (password.value == "") {
+        document.getElementById("password_rules").innerHTML = passwordRules;
+    }
+});
+
 // Warn the user if the password doesn't match the rules (invalid password) upon unfocusing the input field
 password.addEventListener('focusout', () => {
-    if (!password.value.match(/^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{7,})$/)) {
-        document.getElementById("password_rules").innerHTML = "The password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, and one number.";
+    if (!password.value.match(passRegex)) {
+        document.getElementById("password_rules").innerHTML = passwordRules;
         verifications[1] = 0;
     }
   });
@@ -39,7 +50,7 @@ password.addEventListener('focusout', () => {
 // Verify the validity of the password according to the rules upon releasing a key
 password.addEventListener('keyup', () => {
     // If the password matches
-    if (password.value.match(/^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{7,})$/)) {
+    if (password.value.match(passRegex)) {
         // Remove error message
         document.getElementById("password_rules").innerHTML = " ";
         verifications[1] = 1;
@@ -94,12 +105,16 @@ confirmation.addEventListener('keyup', () => {
 setInterval(() => {
     // If all 3 verifications pass, enable the signup button
     if (verifications.toString() == "1,1,1") {
-        submit.classList.remove("disabled")
+        submit.removeAttribute("disabled");
+        submit.removeAttribute("tabindex");
+        submit.removeAttribute("aria-disabled");
     }
     
     // If not, disable it
     else
     {
-        submit.classList.add("disabled")
+        submit.setAttribute("disabled", "disabled");
+        submit.setAttribute("tabindex", "-1");
+        submit.setAttribute("aria-disabled", "true");
     }
 }, 10);
