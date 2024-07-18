@@ -3,7 +3,10 @@ const username = document.getElementById("username");
 const password = document.getElementById("password");
 const confirmation = document.getElementById("confirmation");
 const submit = document.getElementById("submit");
+
+// Strings for later use
 const passwordRules = "The password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, and one number."
+const usernameRules = "The username must only consist of alphanumeric characters."
 
 // Array for enabling the signup button upon passing all verifications
 var verifications = [0, 0, 0];
@@ -11,18 +14,29 @@ var verifications = [0, 0, 0];
 // Regular expression for password
 var passRegex = /^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,})$/
 
-// Verify that a username was entered upon unfocusing the input field
-username.addEventListener("focusout", () => {
-    if (username.value.length < 1) {
-        // Warn the user if they leave the input field without entering a username
-        document.getElementById("username_warning").innerHTML = "Please enter a username.";
+// Regular expression for username
+var userRegex = /^([0-9]|[a-z])+([0-9a-z]+)$/
+
+// Inform the user about the username rules when they focus on the username field
+username.addEventListener('focusin', () => {
+    if (username.value == "") {
+        document.getElementById("username_warning").innerHTML = usernameRules;
+    }
+});
+
+// Warn the user if the username doesn't match the rules (invalid username) upon unfocusing the input field
+username.addEventListener('focusout', () => {
+    if (!username.value.match(userRegex)) {
+        document.getElementById("username_warning").innerHTML = usernameRules;
         verifications[0] = 0;
     }
 });
 
-// Remove the warning when the user inputs something in the input field
-username.addEventListener("keyup", () => {
-    if (username.value.length >= 1) {
+// Verify the validity of the username according to the rules upon releasing a key
+username.addEventListener('keyup', () => {
+    // If the username matches
+    if (username.value.match(userRegex)) {
+        // Remove error message
         document.getElementById("username_warning").innerHTML = " ";
         verifications[0] = 1;
     }
@@ -45,7 +59,7 @@ password.addEventListener('focusout', () => {
         document.getElementById("password_rules").innerHTML = passwordRules;
         verifications[1] = 0;
     }
-  });
+});
 
 // Verify the validity of the password according to the rules upon releasing a key
 password.addEventListener('keyup', () => {
@@ -59,7 +73,7 @@ password.addEventListener('keyup', () => {
     {
         verifications[1] = 0;
     }
-  });
+});
 
 // Warn the user that the password and confirmation don't match when the user leaves the password field
 password.addEventListener('focusout', () => {

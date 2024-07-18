@@ -24,7 +24,13 @@ def after_request(response):
 
 
 @app.route("/")
+@login_required
 def index():
+    with sqlite3.connect(f"{session['username']}.db") as con:
+        cur = con.cursor()
+        cur.execute("""
+                    
+                    """)
     return render_template("index.html")
 
 
@@ -33,13 +39,15 @@ def login():
     # User reached route via GET
     if request.method == "GET":
         # If the user is already logged in, redirect them to / instead
-        try:
-            if session["user_id"]:
-                return redirect("/")
+        if session.get("user_id"):
+            flash("You are already logged in. To log in from another account, please log out first.")
+            return redirect("/")
 
         # If not, take them to the login page
-        except KeyError:
-            return render_template("login.html")
+        else:
+            # URL used to offer the user to sign up if they haven't already
+            signup_url = url_for("signup")
+            return render_template("login.html", signup_url=signup_url)
 
     # User reached route via POST
     if request.method == "POST":
@@ -92,8 +100,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-    # If the user is logged in, forget their session data and inform them
-    try:
+    # If the user is logged in, forget their session data and inform them, then redirect to /login
+    if session.get("username") is not None:
         # Remember the message before clearing the session data
         flash_message = "User " + session["username"] + " logged out!"
 
@@ -102,12 +110,14 @@ def logout():
 
         # Inform the user
         flash(flash_message)
+
+        # Redirect them to /login
+        return redirect("/login")
     
     # If they aren't logged in, take them to the login page instead
-    except KeyError:
+    else:
+        flash("You are not currently logged in.")
         return redirect("/login")
-
-    return redirect("/login")
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -115,13 +125,14 @@ def signup():
     # User reached route via GET
     if request.method == "GET":
         # If the user is already logged in, redirect them to / instead
-        try:
-            if session["user_id"]:
-                return redirect("/")
+        if session.get("user_id"):
+            flash("You are already logged in to an account. To to make a new account, please log out first.")
+            return redirect("/")
 
         # If not, take them to the sign up page
-        except KeyError:
-            return render_template("signup.html")
+        else:
+            login_url = url_for("login")
+            return render_template("signup.html", login_url=login_url)
 
 
     # User reached route via POST
@@ -148,12 +159,31 @@ def signup():
         if confirmation != password:
             return apologize("signup", "The passwords don't match.")
 
-        # Try to add the user to the database
+        # Try to add the user to the users database
         try:
             sql("users.db", """
                 INSERT INTO users (username, hash)
                 VALUES (?, ?)
                 """, (username, generate_password_hash(password),))
+            # Make a database for the user's notes
+            with sqlite3.connect(f"./databases/{username}-notes.db") as con:
+                cur = con.cursor()
+                cur.execute("""
+                            CREATE TABLE notes
+                            (
+                                note_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                                note_title TEXT,
+                                note_body TEXT,
+                                images TEXT/BLOB,
+                                date_created NUMERIC NOT NULL,
+                                date_modified NUMERIC NOT NULL,
+                                formatting TEXT,
+                                color TEXT,
+                                bg_color TEXT,
+                                tags TEXT,
+                                trashed INTEGER DEFAULT 0
+                            );
+                            """)
             
         # If an IntegrityError is encountered (i.e., the username is taken), inform the user with an error
         except sqlite3.IntegrityError:

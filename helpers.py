@@ -1,17 +1,19 @@
 import sqlite3
 
-from flask import redirect, render_template, session, url_for
+from flask import flash, redirect, render_template, session, url_for
 from functools import wraps
 
 
-# Function that prevents access to protected pages/routes
+# Function that prevents access to protected pages/routes without logging in
 def login_required(f):
     """Limit access to protected pages"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session["user_id"] == None:
-            return redirect(url_for("/login"))
+        if session.get("user_id") == None:
+            flash("Please log in first.")
+            return redirect(url_for("login"))
         return f(*args, **kwargs)
+    return decorated_function
     
 
 # Interaction with sqlite3 database

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Login
+    Log in
 {% endblock %}
 
 {% block main %}
@@ -14,6 +14,7 @@
         <p></p>
         <input id="submit" class="btn btn-success" disabled="disabled" tabindex="-1" aria-disabled="true" type="submit" value="Log in">
     </form>
+    <a href={{ signup_url }}><button class="btn btn-link">Don't have an account? Sign up here.</button></a>
 {% endblock %}
 
 {% block script %}
