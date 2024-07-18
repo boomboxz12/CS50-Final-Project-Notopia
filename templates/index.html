@@ -5,5 +5,14 @@
 {% endblock %}
 
 {% block main %}
-    <div class="title-wrapper"><h1 class="title title-276">Notopia</h1></div>
+    <form class="note-form" action="/" method="post">
+        <label class="input-label text" for="title">Title</label>
+        <input autocomplete="off" id="title" name="note_title" placeholder="Untitled note">
+        <label class="input-label text" for="note">Note</label>
+        <textarea autocomplete="off" name="note_body" id="note" placeholder="Note"></textarea>
+        <input id="submit" class="btn btn-success" type="submit" value="Save note">
+    </form>
+    {% for note in notes %}
+        <p>{{ note }}</p>
+    {% endfor %}
 {% endblock %}

@@ -1,6 +1,7 @@
 import re
 import sqlite3
 
+from datetime import datetime
 from flask import flash, Flask, redirect, render_template, request, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -23,15 +24,47 @@ def after_request(response):
     return response
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    with sqlite3.connect(f"{session['username']}.db") as con:
-        cur = con.cursor()
-        cur.execute("""
-                    
-                    """)
-    return render_template("index.html")
+    # User reached route via GET
+    if request.method == "GET":
+        # Read the user's notes and their images
+        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as notes_con:
+            with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
+                notes_cur = notes_con.cursor()
+                notes = notes_cur.execute("""
+                                          SELECT * FROM notes
+                                          """).fetchall()
+                images_cur = images_con.cursor()
+                images = images_cur.execute("""
+                                            SELECT * FROM images
+                                            """).fetchall()
+                
+    # User reached route via POST
+    if request.method == "POST":
+        # Collect data for processing and saving into the database
+        user_id = session["user_id"]
+        note_title = request.form.get("note_title")
+        note_body = request.form.get("note_body")
+        date_created = datetime.now()
+        date_modified = datetime.now()
+        # A tuple for inserting data into the database
+        values = (user_id, note_title, note_body, date_created, date_modified,)
+        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as notes_con:
+            with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
+                notes_cur = notes_con.cursor()
+                notes = notes_cur.execute("""
+                                          INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                                          VALUES (?, ? , ?, ?, ?)
+                                          """, values)
+                images_cur = images_con.cursor()
+                images = images_cur.execute("""
+                                            SELECT * FROM images
+                                            """).fetchall()
+        return redirect("/")
+            
+    return render_template("index.html", notes=notes)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -165,16 +198,17 @@ def signup():
                 INSERT INTO users (username, hash)
                 VALUES (?, ?)
                 """, (username, generate_password_hash(password),))
-            # Make a database for the user's notes
+            
+            # Make a database for the user's notes and another for images
             with sqlite3.connect(f"./databases/{username}-notes.db") as con:
                 cur = con.cursor()
                 cur.execute("""
                             CREATE TABLE notes
                             (
                                 note_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                                user_id INTEGER NOT NULL,
                                 note_title TEXT,
                                 note_body TEXT,
-                                images TEXT/BLOB,
                                 date_created NUMERIC NOT NULL,
                                 date_modified NUMERIC NOT NULL,
                                 formatting TEXT,
@@ -182,6 +216,17 @@ def signup():
                                 bg_color TEXT,
                                 tags TEXT,
                                 trashed INTEGER DEFAULT 0
+                            );
+                            """)
+            with sqlite3.connect(f"./databases/{username}-images.db") as con:
+                cur = con.cursor()
+                cur.execute("""
+                            CREATE TABLE images
+                            (
+                                image_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                                note_id INTEGER NOT NULL,
+                                image BLOB NOT NULL,
+                                FORIEGN KEY note_id REFERENCES notes(note_id)
                             );
                             """)
             
