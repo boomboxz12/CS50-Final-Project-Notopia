@@ -27,19 +27,21 @@ def after_request(response):
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
+    # Get the current note's ID (if any)
+    note_id = request.args.get("id")
+
     # User reached route via GET
     if request.method == "GET":
-        # Read the user's notes and their images
-        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as notes_con:
-            with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
-                notes_cur = notes_con.cursor()
-                notes = notes_cur.execute("""
-                                          SELECT * FROM notes
-                                          """).fetchall()
-                images_cur = images_con.cursor()
-                images = images_cur.execute("""
-                                            SELECT * FROM images
-                                            """).fetchall()
+        # If there is in fact an id argument in the URL, then view the note
+        if note_id:
+            note = sql(f"./databases/{session['username']}-notes.db",
+                       """
+                       SELECT note_id, note_title, note_body
+                       FROM notes
+                       WHERE note_id = ?
+                       """, (note_id,)).fetchall()
+
+            return render_template("index.html", note=note, editing_mode=bool(note_id))
                 
     # User reached route via POST
     if request.method == "POST":
@@ -47,24 +49,59 @@ def index():
         user_id = session["user_id"]
         note_title = request.form.get("note_title")
         note_body = request.form.get("note_body")
-        date_created = datetime.now()
-        date_modified = datetime.now()
-        # A tuple for inserting data into the database
-        values = (user_id, note_title, note_body, date_created, date_modified,)
-        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as notes_con:
-            with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
-                notes_cur = notes_con.cursor()
-                notes = notes_cur.execute("""
-                                          INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
-                                          VALUES (?, ? , ?, ?, ?)
-                                          """, values)
-                images_cur = images_con.cursor()
-                images = images_cur.execute("""
-                                            SELECT * FROM images
-                                            """).fetchall()
-        return redirect("/")
-            
-    return render_template("index.html", notes=notes)
+        date_created = datetime.now().replace(microsecond=0)
+        date_modified = datetime.now().replace(microsecond=0)
+
+        # If the user is currently editing an already existent note, update it in the database and don't make a new one
+        if note_id: # TODO: CAN'T UPDATE ALL COLUMNS TILL FORMATTING, ETC ARE IMPLEMENTED
+            # A tuple for inserting data into the database (editing)
+            qmarks = (note_title, note_body, date_modified, note_id,)
+
+            # Update the note's data
+            sql(f"./databases/{session['username']}-notes.db",
+                """
+                UPDATE notes
+                SET note_title = ?,
+                    note_body = ?, 
+                    date_modified = ?
+                WHERE note_id = ?
+                """, qmarks)
+                # with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
+                #     notes_cur = notes_con.cursor()
+                #     notes = notes_cur.execute("""
+                #                             INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                #                             VALUES (?, ? , ?, ?, ?)
+                #                             """, values)
+                #     images_cur = images_con.cursor()
+                #     images = images_cur.execute("""
+                #                                 SELECT * FROM images
+                #                                 """).fetchall()
+            flash(f"""Note "{note_title}" edited!""")
+            return redirect(f"/?id={note_id}")
+
+        # If the user isn't currently editing an already existent note, create a new one and write it to the database
+        else:
+            with sqlite3.connect(f"./databases/{session['username']}-notes.db") as notes_con:
+                with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
+                    notes_cur = notes_con.cursor()
+
+                    # A tuple for inserting data into the database (creation)
+                    qmarks = (user_id, note_title, note_body, date_created, date_modified,)
+
+                    # Write the new note's data
+                    notes = notes_cur.execute("""
+                                              INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                                              VALUES (?, ? , ?, ?, ?)
+                                              """, qmarks)
+                    images_cur = images_con.cursor()
+                    # images = images_cur.execute("""
+                    #                             SELECT * FROM images
+                    #                             """).fetchall()
+
+            flash(f"""Note "{note_title}" created!""")
+            return redirect("/")
+
+    return render_template("index.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -104,8 +141,6 @@ def login():
                    WHERE username = ?
                    """, (username,)).fetchall()
         
-        print(len(user))###
-        
         # If the user is not found, inform the user
         if not user:
             return apologize("login", """Incorrect username or password. Make sure you entered the correct
@@ -127,7 +162,7 @@ def login():
         # Inform the user that they are now logged in
         flash(f"User {username} logged in!")
 
-        return redirect("/")
+        return redirect("/notes")
     
 
 
@@ -151,7 +186,19 @@ def logout():
     else:
         flash("You are not currently logged in.")
         return redirect("/login")
+    
 
+# Display the user's saved notes
+@app.route("/notes")
+def notes():
+    notes = sql(f"./databases/{session['username']}-notes.db", """
+            SELECT note_id, note_title, note_body
+            FROM notes
+            """).fetchall()
+    print(notes)
+    return render_template("notes.html", notes=notes)
+
+#, note_body, date_created, date_modified, formatting, color, bg_color, tags, trashed
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():

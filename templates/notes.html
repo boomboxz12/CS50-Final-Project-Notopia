@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My notes
+{% endblock %}
+
+{% block main %}
+    <h2 class="text mb-5">My notes</h2>
+    <div class="notes-flex">
+        {% for note in notes %}
+            <a href="/?id={{ note[0] }}" class="note-flex-item">
+                <div class="note-bg"></div>
+                <p class="note-text text">{{ note[1] }}</p>
+                <p class="note-text border border-secondary"></p>
+                <p class="note-text small-text">{{ note[2] }}</p>
+            </a>
+        {% endfor %}
+        {% if not notes %}
+            <h1 clas="text">No notes.</h1>
+        {% endif %}
+    </div>
+    <a href="/"><input class="btn btn-success mt-5" value="New note"></a>
+{% endblock %}

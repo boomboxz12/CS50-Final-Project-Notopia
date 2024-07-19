@@ -17,7 +17,7 @@
                 <div class="container-fluid">
                   <a class="navbar-brand" href="/">
                     <img src="../static/Notopia Logo.png" alt="Notopia logo" width="24" height="24" class="d-inline-block align-text-top">
-                    Notopia
+                    <span class="notopia">Notopia</span>
                   </a>
                   <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -25,6 +25,9 @@
                   <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav">
                       {% if session["user_id"] %}
+                        <li class="nav-item">
+                          <a class="nav-link" href="/notes">My notes</a>
+                        </li>
                         <li class="nav-item">
                           <a class="nav-link" href="/logout">Log out</a>
                         </li>
@@ -42,20 +45,20 @@
               </nav>
         </header>
         <main>
-          
-          <div class="content">
             {% for message in get_flashed_messages() %}
-              <div class="container-toast">
-                <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
-                  <div class="d-flex">
-                    <div class="toast-body">
-                      {{ message }}
+                <div class="container-toast">
+                  <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                      <div class="toast-body">
+                        {{ message }}
+                      </div>
+                      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                   </div>
                 </div>
-              </div>
-            {% endfor %}
+              {% endfor %}
+          <div class="content">
+              
               {% block main %}{% endblock %}
             </div>
             

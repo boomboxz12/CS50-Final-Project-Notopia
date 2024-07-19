@@ -94,8 +94,6 @@ input, textarea
     border-right: 2px solid rgba(214, 203, 64, 1);
 }
 
-
-
 .title.title-276
 {
     max-width: 276px;
@@ -174,6 +172,82 @@ textarea
     justify-content: center;
     align-items: center;
     height: 100%;
+}
+
+.notes-flex
+{
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+    align-items: start;
+    gap: 35px;
+    
+}
+
+.note-bg
+{
+    background-color: #343434;
+    width: 250px;
+    height: 268px;
+    
+    border-radius: 10px;
+    background-image: url("https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fuwp%2Fuwp3771715.jeg");
+    mask-image: linear-gradient(white, transparent)
+}
+
+.note-text
+{
+    position: relative;
+    max-width: 230px;
+    max-height: 150px;
+    overflow: hidden;
+    top: -258px;
+    left: 10px;
+}
+
+.note-flex-item
+{
+    max-height: 268px;
+    box-shadow: 0px 0px 0px 1px #d7cc40; border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #f3f3f3;
+}
+
+.note-flex-item:hover
+{
+    background-color: #393939;
+}
+
+.notopia
+{
+    font-family: "Dosis", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+}
+
+.navbar-brand > .notopia:hover::after
+{   
+    content: " note editor";
+}
+
+.editor-trash-can
+{
+    width: 50px;
+    height: 50px;
+    position: relative;
+    padding: 10px;
+    top: -13px;
+    left: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline;
+}
+
+.editor-trash-can:hover
+{
+    background-color: #393939;
 }
 
 @keyframes typewriter
