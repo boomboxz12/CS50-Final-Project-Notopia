@@ -47,13 +47,27 @@ def index():
     if request.method == "POST":
         # Collect data for processing and saving into the database
         user_id = session["user_id"]
-        note_title = request.form.get("note_title")
+        # The default name for notes without a title should be "Untitled note"
+        if request.form.get("note_title"):
+            note_title = request.form.get("note_title")
+        else:
+            note_title = "Untitled note"
         note_body = request.form.get("note_body")
         date_created = datetime.now().replace(microsecond=0)
         date_modified = datetime.now().replace(microsecond=0)
 
+        # Dots used when the note title is too long for the flash message
+        if len(note_title) > 20:
+            dots = "..."
+        else:
+            dots = ""
+
+        if len(note_title) < 1 and len(note_body) < 1:
+            flash("You can't save an empty note.")
+            return redirect("/")
+
         # If the user is currently editing an already existent note, update it in the database and don't make a new one
-        if note_id: # TODO: CAN'T UPDATE ALL COLUMNS TILL FORMATTING, ETC ARE IMPLEMENTED
+        elif note_id: # TODO: CAN'T UPDATE ALL COLUMNS TILL FORMATTING, ETC ARE IMPLEMENTED
             # A tuple for inserting data into the database (editing)
             qmarks = (note_title, note_body, date_modified, note_id,)
 
@@ -76,7 +90,7 @@ def index():
                 #     images = images_cur.execute("""
                 #                                 SELECT * FROM images
                 #                                 """).fetchall()
-            flash(f"""Note "{note_title}" edited!""")
+            flash(f"""Note "{note_title[:20]}{dots}" edited!""")
             return redirect(f"/?id={note_id}")
 
         # If the user isn't currently editing an already existent note, create a new one and write it to the database
@@ -98,7 +112,8 @@ def index():
                     #                             SELECT * FROM images
                     #                             """).fetchall()
 
-            flash(f"""Note "{note_title}" created!""")
+            
+            flash(f"""Note "{note_title[:20]}{dots}" created!""")
             return redirect("/")
 
     return render_template("index.html")
@@ -191,9 +206,11 @@ def logout():
 # Display the user's saved notes
 @app.route("/notes")
 def notes():
+    # Get the notes from the user's notes database
     notes = sql(f"./databases/{session['username']}-notes.db", """
             SELECT note_id, note_title, note_body
             FROM notes
+            ORDER BY date_created DESC
             """).fetchall()
     print(notes)
     return render_template("notes.html", notes=notes)
