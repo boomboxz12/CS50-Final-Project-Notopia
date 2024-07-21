@@ -15,7 +15,7 @@ var verifications = [0, 0, 0];
 var passRegex = /^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,})$/
 
 // Regular expression for username
-var userRegex = /^([0-9]|[a-z])+([0-9a-z]+)$/
+var userRegex = /^[a-zA-Z0-9_]*$/gm
 
 // Inform the user about the username rules when they focus on the username field
 username.addEventListener('focusin', () => {

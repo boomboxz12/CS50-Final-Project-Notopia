@@ -189,8 +189,9 @@ textarea
     height: 268px;
     
     border-radius: 10px;
-    background-image: url("https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwallpapercave.com%2Fuwp%2Fuwp3771715.jeg");
-    mask-image: linear-gradient(white, transparent)
+    /* background-image: url("https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.wccftech.com%2Fwp-content%2Fuploads%2F2020%2F01%2Fgenshin_impact.jpg"); */
+    background-position: 50%;
+    mask-image: linear-gradient(rgba(0, 0, 0, 0.4), transparent)
 }
 
 .note-text
@@ -254,6 +255,22 @@ textarea
 .editor-trash-can:hover
 {
     background-color: #393939;
+}
+
+.modal-content
+{
+    background-color: #2c2c2c;
+}
+
+.modal-content > .btn-close
+{
+    color: aqua;
+}
+
+
+.modal-header, .modal-footer
+{
+    border-color: #393939;
 }
 
 @keyframes typewriter
