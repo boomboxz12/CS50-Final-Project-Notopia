@@ -229,15 +229,14 @@ textarea
 
 .editor-trash-can
 {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
     position: relative;
     padding: 10px;
     top: -13px;
     left: 10px;
     border-radius: 5px;
     cursor: pointer;
-    display: inline;
 }
 
 .note-text.text
@@ -271,6 +270,40 @@ textarea
 .modal-header, .modal-footer
 {
     border-color: #393939;
+}
+
+.error_message
+{
+    max-width: 100vh;
+    margin: 0 auto;
+}
+
+.tools
+{
+    display: flex;
+    margin: 0 auto;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    gap: 10px
+}
+
+.tool
+{
+    width: 34px;
+    height: 34px;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.tool:hover
+{
+    background-color: #393939;
+}
+
+.invisible
+{
+    display: none;
 }
 
 @keyframes typewriter

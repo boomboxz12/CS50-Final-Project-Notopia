@@ -182,6 +182,38 @@ def index():
     return render_template("index.html")
 
 
+# Route for autosaving notes as the user types
+@app.route("/autosave", methods=["POST"])
+def autosave():
+    # Getting the necessary data
+    results = request.get_json()
+    date_created = datetime.now().replace(microsecond=0) # TODO
+    date_modified = datetime.now().replace(microsecond=0)
+    # If the user updates the title
+    if results.get("note_title") and results.get("note_id"):
+        # Save the new title into the database and update date_modified
+        sql(f"./databases/{session.get('username')}-notes.db", 
+            """
+            UPDATE notes
+            SET note_title = ?,
+                date_modified = ?
+            WHERE note_id = ?
+            """, (results["note_title"], date_modified, int(results["note_id"]),))
+    # If the user updates the body
+    if results.get("note_body") and results.get("note_id"):
+        # Save the new title into the database and update date_modified
+        sql(f"./databases/{session.get('username')}-notes.db", 
+            """
+            UPDATE notes
+            SET note_body = ?,
+                date_modified = ?
+            WHERE note_id = ?
+            """, (results["note_body"], date_modified, int(results["note_id"]),))
+
+    # The function returns 204 No Content (A response without a body)
+    return "", 204
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     # User reached route via GET
@@ -221,8 +253,9 @@ def login():
         
         # If the user is not found, inform the user
         if not user:
-            return apologize("login", """Incorrect username or password. Make sure you entered the correct
-                             credintials and try again. If you don't have an account, please make one first.""")
+            return apologize("login", """Incorrect username or password. Make sure you entered them correctly and
+                             try again. If you don't have an account, please make one first. Note that usernames
+                            and passwords are case sensitive.""")
         
         # In the unlikely case that there are multiple users with the same name (normally impossible)
         if len(user) > 1:
@@ -230,8 +263,9 @@ def login():
         
         # Check the password hash and apologize if it doesn't match
         if not check_password_hash(user[0][2], password):
-            return apologize("login", """Incorrect username or password. Make sure you entered the correct
-                             credintials and try again. If you don't have an account, please make one first.""")
+            return apologize("login", """Incorrect username or password. Make sure you entered them correctly and
+                             try again. If you don't have an account, please make one first. Note that usernames
+                            and passwords are case sensitive.""")
         
         # If everything is ok, log the user in by remembering their information in flask.session
         session["user_id"] = user[0][0]

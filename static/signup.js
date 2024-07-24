@@ -6,7 +6,7 @@ const submit = document.getElementById("submit");
 
 // Strings for later use
 const passwordRules = "The password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, and one number."
-const usernameRules = "The username must only consist of alphanumeric characters."
+const usernameRules = "The username must only consist of alphanumeric characters. Usernames are case sensitive."
 
 // Array for enabling the signup button upon passing all verifications
 var verifications = [0, 0, 0];
