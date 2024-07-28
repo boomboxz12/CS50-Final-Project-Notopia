@@ -24,7 +24,7 @@ def after_request(response):
     return response
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/")
 def index():
     # Receive arguments
     note_id = request.args.get("id")
@@ -39,145 +39,65 @@ def index():
     else:
         logged_in = True
 
-    
+    # try except to prevent users who aren't logged in from causing errors
+    try:
+        # If the del argument is found, delete the note TODO: DELETE IMAGES
+        if delete_note:
 
-    # User reached route via GET
-    if request.method == "GET":
-        # try except to prevent users who aren't logged in from causing errors
-        try:
-            # If the del argument is found, delete the note TODO: DELETE IMAGES
-            if delete_note:
-
-                # Reading the note title for the flash message
-                note_title = sql(f"./databases/{session['username']}-notes.db",
-                                """
-                                SELECT note_title
-                                FROM notes
-                                WHERE note_id = ?
-                                """, (delete_note,)).fetchall()[0][0]
-                
-                # Dots used when the note title is too long for the flash messages
-                if len(note_title) > 20:
-                    dots = "..."
-                else:
-                    dots = ""
-                
-                # Delete the note
-                sql(f"./databases/{session['username']}-notes.db",
-                    """
-                    DELETE FROM notes
-                    WHERE note_id = ?
-                    """, (delete_note,))
-                
-                flash(f"""Note "{note_title[:20]}{dots}" deleted!""")
-
-                return redirect("/notes")
-            # If there is only an id argument in the URL, then try viewing the note in editing mode
-            elif note_id:
-                try:
-                    note = sql(f"./databases/{session['username']}-notes.db",
+            # Reading the note title for the flash message
+            note_title = sql(f"./databases/{session['username']}-notes.db",
                             """
-                            SELECT note_id, note_title, note_body
+                            SELECT note_title
                             FROM notes
                             WHERE note_id = ?
-                            """, (note_id,)).fetchall()
-                # KeyError = Not logged in
-                except KeyError:
-                    return apologize("/", "Please log in first.")
-            else:
-                note = None
-        # KeyError = Not logged in
-        except KeyError:
-            return apologize("/", "Please log in first.")
-        # IndexError = Note not found
-        except IndexError:
-            return apologize("/", "Note not found.", 404)
-        
-        # If a note with that ID was found, view it
-        if note:
-            return render_template("index.html", note=note, editing_mode=bool(note_id), logged_in=logged_in)
-        # If a note with that ID wasn't found, view it
-        elif note == []:
-            return apologize("/", "Note not found.", 404)
-        # If the user is not trying to access / in editing mode, render the template without the note
-        else:
-            return render_template("index.html", editing_mode=bool(note_id), logged_in=logged_in)
-                
-    # User reached route via POST
-    if request.method == "POST":
-        # try except to prevent users who aren't logged in from causing errors
-        try:
-            # Collect data for processing and saving into the database
+                            """, (delete_note,)).fetchall()[0][0]
             
-            if request.form.get("note_title"):
-                # If the user enters a note title, use that as the note title to save in the database
-                note_title = request.form.get("note_title")
-            else:
-                # Otherwise, the default name for notes without a title should be "Untitled note"
-                note_title = "Untitled note"
-
-            note_body = request.form.get("note_body")
-            date_created = datetime.now().replace(microsecond=0)
-            date_modified = datetime.now().replace(microsecond=0)
-
             # Dots used when the note title is too long for the flash messages
             if len(note_title) > 20:
                 dots = "..."
             else:
                 dots = ""
-
-            if len(note_title) < 1 and len(note_body) < 1:
-                return apologize("/", "You can't save an empty note.")
             
-            # If the user is currently editing an already existent note, update it in the database and don't make a new one
-            elif note_id: # TODO: CAN'T UPDATE ALL COLUMNS TILL FORMATTING, ETC ARE IMPLEMENTED
-                # Only allow saving if the user is logged in
-                if logged_in:
-                    # A tuple for inserting data into the database (editing)
-                    qmarks = (note_title, note_body, date_modified, note_id,)
+            # Delete the note
+            sql(f"./databases/{session['username']}-notes.db",
+                """
+                DELETE FROM notes
+                WHERE note_id = ?
+                """, (delete_note,))
+            
+            flash(f"""Note "{note_title[:20]}{dots}" deleted!""")
 
-                    # Update the note's data
-                    sql(f"./databases/{session['username']}-notes.db",
+            return redirect("/notes")
+        # If there is only an id argument in the URL, then try viewing the note in editing mode
+        elif note_id:
+            try:
+                note = sql(f"./databases/{session['username']}-notes.db",
                         """
-                        UPDATE notes
-                        SET note_title = ?,
-                            note_body = ?, 
-                            date_modified = ?
+                        SELECT note_id, note_title, note_body
+                        FROM notes
                         WHERE note_id = ?
-                        """, qmarks)
-                    
-                    flash(f"""Note "{note_title[:20]}{dots}" edited!""")
-
-                    return redirect(f"/?id={note_id}")
-                else:
-                    return apologize("/", "You are not currently logged in, so saving has been disabled.")
-
-            # If the user is not currently editing an already existent note, create a new one and write it to the database
-            else:
-                # Only allow saving if the user is logged in
-                if logged_in:
-                    with sqlite3.connect(f"./databases/{session['username']}-notes.db") as notes_con:
-                        with sqlite3.connect(f"./databases/{session['username']}-images.db") as images_con:
-                            notes_cur = notes_con.cursor()
-
-                            # A tuple for inserting data into the database (creation)
-                            qmarks = (user_id, note_title, note_body, date_created, date_modified,)
-
-                            # Write the new note's data
-                            notes = notes_cur.execute("""
-                                                    INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
-                                                    VALUES (?, ? , ?, ?, ?)
-                                                    """, qmarks)
-                    
-                    flash(f"""Note "{note_title[:20]}{dots}" created!""")
-
-                    return redirect("/notes")
-                else:
-                    return apologize("/", "You are currently not logged in, so saving has been disabled.")
-        # KeyError = Not logged in
-        except KeyError:
-            return apologize("/", "Please log in first.")
-
+                        """, (note_id,)).fetchall()
+            # KeyError = Not logged in
+            except KeyError:
+                return apologize("/", "Please log in first.")
+        else:
+            note = None
+    # KeyError = Not logged in
+    except KeyError:
+        return apologize("/", "Please log in first.")
+    # IndexError = Note not found
+    except IndexError:
+        return apologize("/", "Note not found.", 404)
+    
+    # If a note with that ID was found, view it
+    if note:
+        return render_template("index.html", note=note, editing_mode=bool(note_id), logged_in=logged_in)
+    # If a note with that ID wasn't found, view it
+    elif note == []:
+        return apologize("/", "Note not found.", 404)
+    # If the user is not trying to access / in editing mode, render the template without the note
+    else:
+        return render_template("index.html", editing_mode=bool(note_id), logged_in=logged_in)
 
     return render_template("index.html")
 
@@ -189,26 +109,94 @@ def autosave():
     results = request.get_json()
     date_created = datetime.now().replace(microsecond=0) # TODO
     date_modified = datetime.now().replace(microsecond=0)
-    # If the user updates the title
-    if results.get("note_title") and results.get("note_id"):
-        # Save the new title into the database and update date_modified
-        sql(f"./databases/{session.get('username')}-notes.db", 
-            """
-            UPDATE notes
-            SET note_title = ?,
-                date_modified = ?
-            WHERE note_id = ?
-            """, (results["note_title"], date_modified, int(results["note_id"]),))
-    # If the user updates the body
-    if results.get("note_body") and results.get("note_id"):
-        # Save the new title into the database and update date_modified
-        sql(f"./databases/{session.get('username')}-notes.db", 
-            """
-            UPDATE notes
-            SET note_body = ?,
-                date_modified = ?
-            WHERE note_id = ?
-            """, (results["note_body"], date_modified, int(results["note_id"]),))
+    note_id = results.get("note_id")
+    note_title = results.get("note_title")
+    if note_title == "": note_title = "Untitled note"
+    note_body = results.get("note_body")
+    first_autosave = results.get("first_autosave")
+
+    # Try and except to prevent users who aren't logged in from causing errors
+    try:
+        # If the user is editing a preexisting note (a note ID is received from the client)
+        if note_id:
+            # If the user updates the title during editing (if a note title is received from the client side)
+            if note_title or note_title == "":
+                # Save the new title into the database and update date_modified
+                sql(f"./databases/{session.get('username')}-notes.db", 
+                    """
+                    UPDATE notes
+                    SET note_title = ?,
+                        date_modified = ?
+                    WHERE note_id = ?
+                    """, (note_title, date_modified, int(note_id),))
+            
+            # If the user updates the body during editing (if a note body is received from the client side)
+            elif note_body or note_body == "":
+                # Save the new body into the database and update date_modified
+                sql(f"./databases/{session.get('username')}-notes.db", 
+                    """
+                    UPDATE notes
+                    SET note_body = ?,
+                        date_modified = ?
+                    WHERE note_id = ?
+                    """, (note_body, date_modified, int(results["note_id"]),))
+
+        # If the user is creating a new note (a note ID is not received from the client)
+        else:
+            # Get the new note's note_id (the highest existing ID in the database)
+            if not first_autosave:
+                highest_id = sql(f"./databases/{session.get('username')}-notes.db", 
+                                """
+                                SELECT note_id
+                                FROM notes
+                                ORDER BY note_id DESC
+                                LIMIT 1
+                                """).fetchone()[0]
+                highest_id = int(highest_id)
+                new_note_id = highest_id
+            # When the user inputs a title for the new note
+            if note_title or note_title == "":
+                # On first creation: Insert new note with a title into the database
+                if first_autosave:
+                    qmarks = (session["user_id"], note_title, "", date_created, date_modified,)
+                    sql(f"./databases/{session.get('username')}-notes.db", """
+                        INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                        VALUES (?, ?, ?, ?, ?)
+                        """, qmarks)
+                
+                # On further edits without leaving the page: Update already existing title
+                elif not first_autosave:
+                    sql(f"./databases/{session.get('username')}-notes.db", 
+                        """
+                        UPDATE notes
+                        SET note_title = ?,
+                            date_modified = ?
+                        WHERE note_id = ?
+                        """, (note_title, date_modified, new_note_id,))
+            
+            # When the user inputs a body for the new note
+            elif note_body or note_body == "":
+                # On first creation: Insert new note with a body into the database
+                if first_autosave:
+                    qmarks = (session["user_id"], "Untitled note", note_body, date_created, date_modified,)
+                    sql(f"./databases/{session.get('username')}-notes.db", """
+                        INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                        VALUES (?, ?, ?, ?, ?)
+                        """, qmarks)
+                
+                # On further edits without leaving the page: Update already existing body
+                elif not first_autosave:
+                    sql(f"./databases/{session.get('username')}-notes.db", 
+                        """
+                        UPDATE notes
+                        SET note_body = ?,
+                            date_modified = ?
+                        WHERE note_id = ?
+                        """, (note_body, date_modified, new_note_id,))
+                    
+    # "sqlite3.OperationalError: no such table: notes" = logged out user trying to edit notes
+    except sqlite3.OperationalError:
+        return "", 400
 
     # The function returns 204 No Content (A response without a body)
     return "", 204
@@ -300,16 +288,36 @@ def logout():
         return redirect("/login")
     
 
-# Display the user's saved notes
+# Display the user's saved notes and delete any empty ones in the database
 @app.route("/notes")
 @login_required
 def notes():
+    # Keep track of whether empty notes were deleted or not (True = deletion = reread the notes from the database)
+    empty_notes_deleted = False
     # Get the notes from the user's notes database
     notes = sql(f"./databases/{session.get('username')}-notes.db", """
             SELECT note_id, note_title, note_body
             FROM notes
             ORDER BY date_created DESC
             """).fetchall()
+    
+    # Delete any existing empty notes
+    for note in notes:
+        if note[1] == "Untitled note" and not note[2]:
+            sql(f"./databases/{session.get('username')}-notes.db",
+                """
+                DELETE FROM notes
+                WHERE note_id = ?
+                """, (note[0],))
+            empty_notes_deleted = True
+    
+    if empty_notes_deleted:
+        # Reread the notes from the user's notes database (to get rid of deleted notes)
+        notes = sql(f"./databases/{session.get('username')}-notes.db", """
+                SELECT note_id, note_title, note_body
+                FROM notes
+                ORDER BY date_created DESC
+                """).fetchall()
     
     return render_template("notes.html", notes=notes)
 

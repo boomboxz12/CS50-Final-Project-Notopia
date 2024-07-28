@@ -142,6 +142,7 @@ label
     text-align: center;
     color: #f3f3f3;
     border-color: #d7cc40;
+    z-index: 1;
 }
 
 textarea
@@ -227,18 +228,6 @@ textarea
     font-style: normal;
 }
 
-.editor-trash-can
-{
-    width: 52px;
-    height: 52px;
-    position: relative;
-    padding: 10px;
-    top: -13px;
-    left: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
 .note-text.text
 {
     max-height: 70px;
@@ -249,11 +238,6 @@ textarea
 {
     margin-bottom: 10px;
     mask-image: linear-gradient(white 90%, transparent 100%);
-}
-
-.editor-trash-can:hover
-{
-    background-color: #393939;
 }
 
 .modal-content

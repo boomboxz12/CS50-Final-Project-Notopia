@@ -22,7 +22,7 @@ def sql(database: str, query: str, *qmarks: tuple):
     with sqlite3.connect(database) as con:
         cur = con.cursor()
         result = cur.execute(query, *qmarks)
-        print("\n" + " ".join(query.split()) + str(qmarks) + "\n")
+        print("\n" + " ".join(query.split()) + " " + str(qmarks) + "\n")
         return result
     
 def apologize(source: str, message="An unknown error has occurred. Please try again later. We apologize for the inconvenience.", code=400):
