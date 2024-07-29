@@ -73,7 +73,7 @@ def index():
             try:
                 note = sql(f"./databases/{session['username']}-notes.db",
                         """
-                        SELECT note_id, note_title, note_body
+                        SELECT note_id, note_title, note_body, bg_color
                         FROM notes
                         WHERE note_id = ?
                         """, (note_id,)).fetchall()
@@ -99,7 +99,6 @@ def index():
     else:
         return render_template("index.html", editing_mode=bool(note_id), logged_in=logged_in)
 
-    return render_template("index.html")
 
 
 # Route for autosaving notes as the user types
@@ -114,85 +113,98 @@ def autosave():
     if note_title == "": note_title = "Untitled note"
     note_body = results.get("note_body")
     first_autosave = results.get("first_autosave")
+    bg_color = results.get("bg_color")
 
     # Try and except to prevent users who aren't logged in from causing errors
     try:
-        # If the user is editing a preexisting note (a note ID is received from the client)
-        if note_id:
-            # If the user updates the title during editing (if a note title is received from the client side)
-            if note_title or note_title == "":
-                # Save the new title into the database and update date_modified
-                sql(f"./databases/{session.get('username')}-notes.db", 
-                    """
-                    UPDATE notes
-                    SET note_title = ?,
-                        date_modified = ?
-                    WHERE note_id = ?
-                    """, (note_title, date_modified, int(note_id),))
-            
-            # If the user updates the body during editing (if a note body is received from the client side)
-            elif note_body or note_body == "":
-                # Save the new body into the database and update date_modified
-                sql(f"./databases/{session.get('username')}-notes.db", 
-                    """
-                    UPDATE notes
-                    SET note_body = ?,
-                        date_modified = ?
-                    WHERE note_id = ?
-                    """, (note_body, date_modified, int(results["note_id"]),))
+        # If the user is currently updating the background color of the note
+        if bg_color:
+            # Update the note's background color in the database
+            sql(f"./databases/{session.get('username')}-notes.db", 
+                """
+                UPDATE notes
+                SET bg_color = ?
+                WHERE note_id = ?
+                """, (bg_color, note_id,))
 
-        # If the user is creating a new note (a note ID is not received from the client)
+        # If the user is updating actual note content
         else:
-            # Get the new note's note_id (the highest existing ID in the database)
-            if not first_autosave:
-                highest_id = sql(f"./databases/{session.get('username')}-notes.db", 
-                                """
-                                SELECT note_id
-                                FROM notes
-                                ORDER BY note_id DESC
-                                LIMIT 1
-                                """).fetchone()[0]
-                highest_id = int(highest_id)
-                new_note_id = highest_id
-            # When the user inputs a title for the new note
-            if note_title or note_title == "":
-                # On first creation: Insert new note with a title into the database
-                if first_autosave:
-                    qmarks = (session["user_id"], note_title, "", date_created, date_modified,)
-                    sql(f"./databases/{session.get('username')}-notes.db", """
-                        INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
-                        VALUES (?, ?, ?, ?, ?)
-                        """, qmarks)
-                
-                # On further edits without leaving the page: Update already existing title
-                elif not first_autosave:
+            # If the user is editing a preexisting note (a note ID is received from the client)
+            if note_id:
+                # If the user updates the title during editing (if a note title is received from the client side)
+                if note_title or note_title == "":
+                    # Save the new title into the database and update date_modified
                     sql(f"./databases/{session.get('username')}-notes.db", 
                         """
                         UPDATE notes
                         SET note_title = ?,
                             date_modified = ?
                         WHERE note_id = ?
-                        """, (note_title, date_modified, new_note_id,))
-            
-            # When the user inputs a body for the new note
-            elif note_body or note_body == "":
-                # On first creation: Insert new note with a body into the database
-                if first_autosave:
-                    qmarks = (session["user_id"], "Untitled note", note_body, date_created, date_modified,)
-                    sql(f"./databases/{session.get('username')}-notes.db", """
-                        INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
-                        VALUES (?, ?, ?, ?, ?)
-                        """, qmarks)
+                        """, (note_title, date_modified, int(note_id),))
                 
-                # On further edits without leaving the page: Update already existing body
-                elif not first_autosave:
+                # If the user updates the body during editing (if a note body is received from the client side)
+                elif note_body or note_body == "":
+                    # Save the new body into the database and update date_modified
                     sql(f"./databases/{session.get('username')}-notes.db", 
                         """
                         UPDATE notes
                         SET note_body = ?,
                             date_modified = ?
                         WHERE note_id = ?
-                        """, (note_body, date_modified, new_note_id,))
+                        """, (note_body, date_modified, int(results["note_id"]),))
+
+            # If the user is creating a new note (a note ID is not received from the client)
+            else:
+                # Get the new note's note_id (the highest existing ID in the database)
+                if not first_autosave:
+                    highest_id = sql(f"./databases/{session.get('username')}-notes.db", 
+                                    """
+                                    SELECT note_id
+                                    FROM notes
+                                    ORDER BY note_id DESC
+                                    LIMIT 1
+                                    """).fetchone()[0]
+                    highest_id = int(highest_id)
+                    new_note_id = highest_id
+                # When the user inputs a title for the new note
+                if note_title or note_title == "":
+                    # On first creation: Insert new note with a title into the database
+                    if first_autosave:
+                        qmarks = (session["user_id"], note_title, "", date_created, date_modified,)
+                        sql(f"./databases/{session.get('username')}-notes.db", """
+                            INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                            VALUES (?, ?, ?, ?, ?)
+                            """, qmarks)
+                    
+                    # On further edits without leaving the page: Update already existing title
+                    elif not first_autosave:
+                        sql(f"./databases/{session.get('username')}-notes.db", 
+                            """
+                            UPDATE notes
+                            SET note_title = ?,
+                                date_modified = ?
+                            WHERE note_id = ?
+                            """, (note_title, date_modified, new_note_id,))
+                
+                # When the user inputs a body for the new note
+                elif note_body or note_body == "":
+                    # On first creation: Insert new note with a body into the database
+                    if first_autosave:
+                        qmarks = (session["user_id"], "Untitled note", note_body, date_created, date_modified,)
+                        sql(f"./databases/{session.get('username')}-notes.db", """
+                            INSERT INTO notes (user_id, note_title, note_body, date_created, date_modified)
+                            VALUES (?, ?, ?, ?, ?)
+                            """, qmarks)
+                    
+                    # On further edits without leaving the page: Update already existing body
+                    elif not first_autosave:
+                        sql(f"./databases/{session.get('username')}-notes.db", 
+                            """
+                            UPDATE notes
+                            SET note_body = ?,
+                                date_modified = ?
+                            WHERE note_id = ?
+                            """, (note_body, date_modified, new_note_id,))
                     
     # "sqlite3.OperationalError: no such table: notes" = logged out user trying to edit notes
     except sqlite3.OperationalError:
@@ -296,7 +308,7 @@ def notes():
     empty_notes_deleted = False
     # Get the notes from the user's notes database
     notes = sql(f"./databases/{session.get('username')}-notes.db", """
-            SELECT note_id, note_title, note_body
+            SELECT note_id, note_title, note_body, bg_color
             FROM notes
             ORDER BY date_created DESC
             """).fetchall()
@@ -314,7 +326,7 @@ def notes():
     if empty_notes_deleted:
         # Reread the notes from the user's notes database (to get rid of deleted notes)
         notes = sql(f"./databases/{session.get('username')}-notes.db", """
-                SELECT note_id, note_title, note_body
+                SELECT note_id, note_title, note_body, bg_color
                 FROM notes
                 ORDER BY date_created DESC
                 """).fetchall()

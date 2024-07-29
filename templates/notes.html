@@ -10,10 +10,12 @@
     <div class="notes-flex">
         {% for note in notes %}
             <a href="/?id={{ note[0] }}" class="note-flex-item">
-                <div class="note-bg"></div>
+                <div id="note-bg" class="note-bg"></div>
                 <p class="note-text text">{{ note[1] }}</p>
                 <p class="note-text border border-secondary"></p>
                 <p class="note-text small-text">{{ note[2] }}</p>
+                <p id="note_id" class="invisible">{{ note[0] }}</p>
+                <p id="bg_color" class="invisible">{{ note[3] }}</p>
             </a>
         {% endfor %}
         {% if not notes %}
@@ -21,4 +23,7 @@
         {% endif %}
     </div>
     <a href="/"><input class="btn btn-success mt-5" value="New note"></a>
+{% endblock %}
+{% block script %}
+<script src="../static/notes.js"></script>
 {% endblock %}

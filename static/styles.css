@@ -1,3 +1,8 @@
+:root
+{
+    --bs-dropdown-link-hover-bg: red !important;
+}
+
 html
 {
     background-color: #121212;
@@ -185,14 +190,11 @@ textarea
 
 .note-bg
 {
-    background-color: #343434;
     width: 250px;
     height: 268px;
-    
     border-radius: 10px;
     /* background-image: url("https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn.wccftech.com%2Fwp-content%2Fuploads%2F2020%2F01%2Fgenshin_impact.jpg"); */
     background-position: 50%;
-    mask-image: linear-gradient(rgba(0, 0, 0, 0.4), transparent)
 }
 
 .note-text
@@ -207,6 +209,7 @@ textarea
 
 .note-flex-item
 {
+    background-color: #2c2c2c;
     max-height: 268px;
     box-shadow: 0px 0px 0px 1px #d7cc40; border-radius: 10px;
     cursor: pointer;
@@ -289,6 +292,142 @@ textarea
 {
     display: none;
 }
+
+.dropdown-menu.show
+{
+    background-color: #121212;
+    border: 1px solid #d7cc40;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    gap: 5px;
+    padding: 5px;
+    width: 200px;
+}
+
+.dropdown-menu > li 
+{
+    display: inline-block;
+}
+
+.dropdown-item
+{
+    cursor: pointer;
+    min-width: 24px;
+    min-height: 24px;
+    border-radius: 2px;
+}
+
+.dropdown-item:focus, .dropdown-item:hover
+{
+    background-color: #616161;
+}
+
+.dropdown-item:active
+{
+    background-color: transparent;
+}
+
+#bg-selector-dark
+{
+    background-color: #212121;
+}
+
+#bg-selector-dark:hover
+{
+    background-color: #343434;
+}
+
+#bg-selector-red
+{
+    background-color: #361617;
+}
+
+#bg-selector-red:hover
+{
+    background-color: #481d1e;
+}
+
+#bg-selector-orange
+{
+    background-color: #463123;
+}
+
+#bg-selector-orange:hover
+{
+    background-color: #554032;
+}
+
+#bg-selector-yellow
+{
+    background-color: #453b22;
+}
+
+#bg-selector-yellow:hover
+{
+    background-color: #4c4228;
+}
+
+#bg-selector-green
+{
+    background-color: #28381e;
+}
+
+#bg-selector-green:hover
+{
+    background-color: #2f4224;
+}
+
+#bg-selector-aqua
+{
+    background-color: #1a3639;
+}
+
+#bg-selector-aqua:hover
+{
+    background-color: #1f4546;
+}
+
+#bg-selector-navy
+{
+    background-color: #2a3137;
+}
+
+#bg-selector-navy:hover
+{
+    background-color: #32393f;
+}
+
+#bg-selector-blue
+{
+    background-color: #232a3d;
+}
+
+#bg-selector-blue:hover
+{
+    background-color: #2e3854;
+}
+
+#bg-selector-purple
+{
+    background-color: #302533;
+}
+
+#bg-selector-purple:hover
+{
+    background-color: #3a2b40;
+}
+
+#bg-selector-pink
+{
+    background-color: #451926;
+}
+
+#bg-selector-pink:hover
+{
+    background-color: #5c2233;
+}
+
 
 @keyframes typewriter
 {
