@@ -100,7 +100,6 @@ def index():
         return render_template("index.html", editing_mode=bool(note_id), logged_in=logged_in)
 
 
-
 # Route for autosaving notes as the user types
 @app.route("/autosave", methods=["POST"])
 def autosave():
@@ -123,9 +122,10 @@ def autosave():
             sql(f"./databases/{session.get('username')}-notes.db", 
                 """
                 UPDATE notes
-                SET bg_color = ?
+                SET bg_color = ?,
+                    date_modified = ?
                 WHERE note_id = ?
-                """, (bg_color, note_id,))
+                """, (bg_color, date_modified, note_id,))
 
         # If the user is updating actual note content
         else:
@@ -393,7 +393,7 @@ def signup():
                                 date_modified NUMERIC NOT NULL,
                                 formatting TEXT,
                                 color TEXT,
-                                bg_color TEXT,
+                                bg_color TEXT DEFAULT 'dark' NOT NULL,
                                 tags TEXT,
                                 trashed INTEGER DEFAULT 0
                             );
