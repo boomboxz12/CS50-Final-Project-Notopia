@@ -3,16 +3,18 @@ import sqlite3
 
 from datetime import datetime
 from flask import flash, Flask, redirect, render_template, request, session, url_for
+from flask_misaka import Misaka
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import *
 
-# Configuring Flask, the session, and the response
+# Configuring Flask, Flask-Misaka, the session, and the response
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "cachelib"
 Session(app)
+Misaka(app)
 
 
 @app.after_request
@@ -68,7 +70,7 @@ def index():
             flash(f"""Note "{note_title[:20]}{dots}" deleted!""")
 
             return redirect("/notes")
-        # If there is only an id argument in the URL, then try viewing the note in editing mode
+        # If there is only an id argument in the URL, then try reading the note from the database
         elif note_id:
             try:
                 note = sql(f"./databases/{session['username']}-notes.db",
@@ -92,10 +94,10 @@ def index():
     # If a note with that ID was found, view it
     if note:
         return render_template("index.html", note=note, editing_mode=bool(note_id), logged_in=logged_in)
-    # If a note with that ID wasn't found, view it
+    # If a note with that ID wasn't found, apologize
     elif note == []:
         return apologize("/", "Note not found.", 404)
-    # If the user is not trying to access / in editing mode, render the template without the note
+    # If the user is not trying to access index (/) in editing mode, render the template without the note
     else:
         return render_template("index.html", editing_mode=bool(note_id), logged_in=logged_in)
 
@@ -371,6 +373,19 @@ def signup():
         # Check if the confirmation matches the password
         if confirmation != password:
             return apologize("signup", "The passwords don't match.")
+
+        # If users.db doesn't alrady exist, make it
+        try:
+            sql("users.db", """
+                CREATE TABLE users 
+                (
+                    user_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                    username TEXT NOT NULL UNIQUE,
+                    hash TEXT NOT NULL
+                )
+                """)
+        except sqlite3.OperationalError:
+            pass
 
         # Try to add the user to the users database
         try:

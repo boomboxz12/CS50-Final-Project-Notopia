@@ -1,4 +1,5 @@
 import bgColors from "./bgColors.js";
+import markdownIt from 'https://cdn.jsdelivr.net/npm/markdown-it@14.1.0/+esm';
 
 // Get the DOMs
 const noteTitle = document.getElementById("title");
@@ -10,7 +11,9 @@ const contentDiv = document.getElementById("content");
 const noteData = document.querySelectorAll(".note_data");
 const bgSelector = document.querySelectorAll(".bg-selector");
 const bgColor = document.getElementById("bg_color").innerHTML;
-
+const viewButton = document.getElementById("view_button");
+const viewArea = document.getElementById("view_area");
+const noteBodyLabel = document.getElementById("note_body_label");
 
 // Is the user logged in?
 const loggedIn = !Boolean(document.getElementById("saving_disabled_message").innerHTML);
@@ -25,6 +28,19 @@ undoButton.addEventListener("click", () => {
 redoButton.addEventListener("click", () => {
     noteBody.focus();
     document.execCommand("redo");
+})
+
+// Toggle editing mode and markdown viewing mode when viewButton is clicked
+var viewButtonClicks = 0;
+const displayStates = ["inline-block", "none"];
+const noteBodyLabels = ["Note", "Markdown view"]
+viewButton.addEventListener("click", () => {
+    viewButtonClicks += 1;
+    // viewArea.style.maxHeight = noteBody.offsetHeight + "px";
+    noteBody.style.display = displayStates[viewButtonClicks % 2];
+    viewArea.style.display = displayStates[(viewButtonClicks + 1) % 2];
+    noteBodyLabel.innerHTML = noteBodyLabels[viewButtonClicks % 2];
+    
 })
 
 // If the user is logged in (#saving_disabled_message.innerHTML is false), activate autosave
@@ -51,6 +67,10 @@ if (loggedIn) {
     });
     // It is no longer the first autosave from now on
     firstAutosave = false;
+    // Update markdown view
+    const md = markdownIt();
+    const result = md.render(noteBody.value);
+    viewArea.innerHTML = result;
     });
 }
 
@@ -73,9 +93,11 @@ function bgSelectorFunction(item) {
 }
 
 // Upon loading a note in the editor, change the note background color according to what's in the database
-
-contentDiv.style.backgroundColor = bgColors[bgColor][0];
-noteData.forEach((colorChange))
-function colorChange(element) {
-    element.style.backgroundColor = bgColors[bgColor][1];
-}
+try {
+    contentDiv.style.backgroundColor = bgColors[bgColor][0];
+    noteData.forEach((colorChange))
+    function colorChange(element) {
+        element.style.backgroundColor = bgColors[bgColor][1];
+}}
+// Prevents "Uncaught TypeError: (intermediate value)[bgColor] is undefined"
+catch (error) {}
