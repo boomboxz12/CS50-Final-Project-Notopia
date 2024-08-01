@@ -65,7 +65,7 @@ main
     font-size: 1.25rem;
 }
 
-input, textarea, .view_area
+input, textarea, .view_area, select
 {
     margin-bottom: 24px;
     width: calc(30vw + 100px);
@@ -441,6 +441,17 @@ img
 {
     max-width: 100%;
     max-height: 100%;
+}
+
+.nav-plus-icon
+{
+    width: 0.75rem;
+    height: 0.75rem;
+}
+
+.notes-page-top > p
+{
+    margin-top: -30px;
 }
 
 

@@ -3,18 +3,16 @@ import sqlite3
 
 from datetime import datetime
 from flask import flash, Flask, redirect, render_template, request, session, url_for
-from flask_misaka import Misaka
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from helpers import *
 
-# Configuring Flask, Flask-Misaka, the session, and the response
+# Configuring Flask, the session, and the response
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "cachelib"
 Session(app)
-Misaka(app)
 
 
 @app.after_request
@@ -75,7 +73,7 @@ def index():
             try:
                 note = sql(f"./databases/{session['username']}-notes.db",
                         """
-                        SELECT note_id, note_title, note_body, bg_color
+                        SELECT note_id, note_title, note_body, bg_color, date_created, date_modified
                         FROM notes
                         WHERE note_id = ?
                         """, (note_id,)).fetchall()
@@ -273,25 +271,16 @@ def login():
         session["user_id"] = user[0][0]
         session["username"] = user[0][1]
 
-        # Inform the user that they are now logged in
-        flash(f'User "{username}" logged in!')
-
         return redirect("/notes")
     
 
 
 @app.route("/logout")
 def logout():
-    # If the user is logged in, forget their session data and inform them, then redirect to /login
+    # If the user is logged in, forget their session data then redirect to /login
     if session.get("username") is not None:
-        # Remember the message before clearing the session data
-        flash_message = "User " + '"' + session["username"] + '"' + " logged out!"
-
         # Clear the user's session data
         session.clear()
-
-        # Inform the user
-        flash(flash_message)
 
         # Redirect them to /login
         return redirect("/login")
@@ -306,34 +295,41 @@ def logout():
 @app.route("/notes")
 @login_required
 def notes():
-    # Keep track of whether empty notes were deleted or not (True = deletion = reread the notes from the database)
-    empty_notes_deleted = False
-    # Get the notes from the user's notes database
-    notes = sql(f"./databases/{session.get('username')}-notes.db", """
-            SELECT note_id, note_title, note_body, bg_color
-            FROM notes
-            ORDER BY date_created DESC
-            """).fetchall()
+    # Has the user requested that I sort their notes?
+    sort = request.args.get("sort_notes_by")
+
+    # Dictionary used to modify the SQL query when sorting notes
+    sort_dict = {
+        "title-asc": "note_title COLLATE NOCASE ASC",
+        "title-desc": "note_title COLLATE NOCASE DESC",
+        "creation-asc": "date_created ASC",
+        "creation-desc": "date_created DESC",
+        "modification-asc": "date_modified ASC",
+        "modification-desc": "date_modified DESC",
+        None: "date_created DESC"
+    }
+
+    # Read the notes from the user's notes database
+    def get_notes():
+        notes = sql(f"./databases/{session.get('username')}-notes.db", f"""
+                SELECT note_id, note_title, note_body, bg_color, date_created, date_modified
+                FROM notes
+                ORDER BY {sort_dict[sort]}
+                """).fetchall()
+        return notes
     
     # Delete any existing empty notes
-    for note in notes:
+    for note in get_notes():
         if note[1] == "Untitled note" and not note[2]:
             sql(f"./databases/{session.get('username')}-notes.db",
                 """
                 DELETE FROM notes
                 WHERE note_id = ?
                 """, (note[0],))
-            empty_notes_deleted = True
+                
+    return render_template("notes.html", notes=get_notes()) # Calling get_notes again to reread the notes after deleting any empty notes
     
-    if empty_notes_deleted:
-        # Reread the notes from the user's notes database (to get rid of deleted notes)
-        notes = sql(f"./databases/{session.get('username')}-notes.db", """
-                SELECT note_id, note_title, note_body, bg_color
-                FROM notes
-                ORDER BY date_created DESC
-                """).fetchall()
     
-    return render_template("notes.html", notes=notes)
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -406,8 +402,6 @@ def signup():
                                 note_body TEXT,
                                 date_created NUMERIC NOT NULL,
                                 date_modified NUMERIC NOT NULL,
-                                formatting TEXT,
-                                color TEXT,
                                 bg_color TEXT DEFAULT 'dark' NOT NULL,
                                 tags TEXT,
                                 trashed INTEGER DEFAULT 0

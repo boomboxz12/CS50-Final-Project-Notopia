@@ -40,13 +40,18 @@ viewButton.addEventListener("click", () => {
     noteBody.style.display = displayStates[viewButtonClicks % 2];
     viewArea.style.display = displayStates[(viewButtonClicks + 1) % 2];
     noteBodyLabel.innerHTML = noteBodyLabels[viewButtonClicks % 2];
-    
-})
+
+    // Update markdown view
+    const md = markdownIt();
+    const result = md.render(noteBody.value);
+    viewArea.innerHTML = result;
+});
 
 // If the user is logged in (#saving_disabled_message.innerHTML is false), activate autosave
 if (loggedIn) {
     // Is this the first autosave on this page visit?
     var firstAutosave = true;
+
     // Use Fetch API to send the note title to the server every time the user changes the value of noteTitle (for autosave functionality)
     noteTitle.addEventListener("input", async () => {
         await fetch("/autosave", {
@@ -54,6 +59,7 @@ if (loggedIn) {
         body: JSON.stringify({"note_id": noteId.innerHTML, "note_title": noteTitle.value, "first_autosave": firstAutosave}),
         headers: {"Content-Type": "application/json"}
     });
+
     // It is no longer the first autosave from now on
     firstAutosave = false;
     });
@@ -65,12 +71,9 @@ if (loggedIn) {
         body: JSON.stringify({"note_id": noteId.innerHTML, "note_body": noteBody.value, "first_autosave": firstAutosave}),
         headers: {"Content-Type": "application/json"}
     });
+
     // It is no longer the first autosave from now on
     firstAutosave = false;
-    // Update markdown view
-    const md = markdownIt();
-    const result = md.render(noteBody.value);
-    viewArea.innerHTML = result;
     });
 }
 

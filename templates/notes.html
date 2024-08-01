@@ -5,24 +5,43 @@
 {% endblock %}
 
 {% block main %}
-    <h2 class="text mb-5">My notes</h2>
-    <a href="/"><input class="btn btn-success mb-5" value="New note"></a>
+    <div class="notes-page-top">
+        <h2 class="text mb-5">My notes</h2>
+        {% if notes %}
+            <p class="small-text">Sort notes by:</p>
+            <form action="/notes" method="get">
+                <select name="sort_notes_by" id="sort_notes_by">
+                    <option selected disabled>Sort notes by...</option>
+                    <option value="title-asc">Title (ascending)</option>
+                    <option value="title-desc">Title (descending)</option>
+                    <option value="creation-asc">Creation (ascending)</option>
+                    <option value="creation-desc">Creation (descending, default)</option>
+                    <option value="modification-asc">Last modification (ascending)</option>
+                    <option value="modification-desc">Last modification (descending)</option>
+                </select>
+                <button type="submit" id="sort_button" class="btn btn-warning mb-1">Sort</button>
+            </form>
+        {% endif %}
+    </div>
+
     <div class="notes-flex">
         {% for note in notes %}
             <a href="/?id={{ note[0] }}" class="note-flex-item">
-                <div id="note-bg" class="note-bg"></div>
-                <p class="note-text text">{{ note[1] }}</p>
+                <div class="note-bg"></div>
+                <p class="invisible note_id">{{ note[0] }}</p>
+                <p class="note-text text note-title">{{ note[1] }}</p>
                 <p class="note-text border border-secondary"></p>
-                <p class="note-text small-text">{{ note[2] }}</p>
-                <p id="note_id" class="invisible">{{ note[0] }}</p>
-                <p id="bg_color" class="invisible">{{ note[3] }}</p>
+                <p class="note-text small-text note-body">{{ note[2] }}</p>
+                <p class="invisible bg_color">{{ note[3] }}</p>
+                <p class="invisible date_created">{{ note[4] }}</p>
+                <p class="invisible date_modified">{{ note[5] }}</p>
             </a>
         {% endfor %}
         {% if not notes %}
             <h1 clas="text">No notes.</h1>
         {% endif %}
     </div>
-    <a href="/"><input class="btn btn-success mt-5" value="New note"></a>
+    <p></p>
 {% endblock %}
 {% block script %}
 <script type="module" src="../static/notes.js"></script>

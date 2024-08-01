@@ -1,5 +1,3 @@
 flask
-Flask-Misaka
 flask_session
-Markdown
 werkzeug

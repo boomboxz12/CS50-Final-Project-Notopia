@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Home
+    Note editor
 {% endblock %}
 
 {% block main %}
@@ -13,7 +13,7 @@
         <input class="note_data" autocomplete="off" id="title" name="note_title" placeholder="Untitled note" value={% if editing_mode %}"{{ note[0][1] }}"{% endif %}>
         <label id="note_body_label" class="input-label text" for="note">Note</label>
         <textarea class="note_data" autocomplete="off" name="note_body" id="note" placeholder="Note">{% if editing_mode %}{{ note[0][2] }}{% endif %}</textarea>
-        <div id="view_area" class="view_area note_data">{% if editing_mode %}{{ note[0][2]|markdown }}{% endif %}</div>
+        <div id="view_area" class="view_area note_data"></div>
         {% if not logged_in %}
             <p id="saving_disabled_message">You are currently not logged in, so saving has been disabled. To save your notes, please <a href="/login">log in</a> first.</p>
         {% else %}
@@ -60,6 +60,7 @@
                 </div>
                 </div>
             </div>
+            <p></p>
         {% endif %}
     </div>
 {% endblock %}
