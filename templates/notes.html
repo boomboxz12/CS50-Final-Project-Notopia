@@ -5,6 +5,17 @@
 {% endblock %}
 
 {% block main %}
+    <!-- Selected notes counter -->
+    <div id="selected-notes-counter" class="invisible container-toast">
+        <div class="toast align-items-center" data-bs-autohide="false" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body"></div>
+            <div class="toast-body note-counter-tools">
+                <svg data-bs-toggle="modal" data-bs-target="#deleteConfirmation" class="editor-trash-can tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/></svg>
+            </div>
+        </div>
+    </div>
+    </div>
     <div class="notes-page-top">
         <h2 class="text mb-5">My notes</h2>
         {% if notes %}
@@ -23,11 +34,11 @@
             </form>
         {% endif %}
     </div>
-
     <div class="notes-flex">
         {% for note in notes %}
             <a href="/?id={{ note[0] }}" class="note-flex-item">
                 <div class="note-bg"></div>
+                <input type="checkbox">
                 <p class="invisible note_id">{{ note[0] }}</p>
                 <p class="note-text text note-title">{{ note[1] }}</p>
                 <p class="note-text border border-secondary"></p>
@@ -42,6 +53,23 @@
         {% endif %}
     </div>
     <p></p>
+    <div class="modal" id="deleteConfirmation" tabindex="-1" aria-labelledby="deleteConfirmation" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h1 class="modal-title fs-5" id="deleteConfirmation">Confirm deletion</h1>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modal-body" class="modal-body">
+                Are you sure you want to delete the selected note(s)?<br>This action can't be undone!
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, keep note</button>
+            <a id="modal-confirm-delete-button" href=""><button type="button" class="btn btn-warning" data-bs-dismiss="modal">Yes, delete note</button></a>
+            </div>
+        </div>
+        </div>
+    </div>
 {% endblock %}
 {% block script %}
 <script type="module" src="../static/notes.js"></script>

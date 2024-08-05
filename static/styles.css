@@ -65,7 +65,7 @@ main
     font-size: 1.25rem;
 }
 
-input, textarea, .view_area, select
+input[type=text], input[type=password], textarea, .view_area, select
 {
     margin-bottom: 24px;
     width: calc(30vw + 100px);
@@ -202,7 +202,7 @@ textarea
     max-width: 230px;
     max-height: 150px;
     overflow: hidden;
-    top: -258px;
+    top: -278px;
     left: 10px;
 }
 
@@ -234,6 +234,7 @@ textarea
 {
     max-height: 70px;
     mask-image: linear-gradient(white 85%, transparent 100%);
+    padding: 0 26px;
 }
 
 .note-text.small-text
@@ -454,6 +455,76 @@ img
     margin-top: -30px;
 }
 
+input[type=checkbox]
+{
+    width: 24px;
+    height: 24px;
+    position: relative;
+    display: flex;
+    top: -253px;
+    left: 10px;
+    z-index: 1;
+    appearance: none;
+    background-color: #b8b8b8;
+    border-radius: 20%;
+    color: #212121
+}
+
+input[type=checkbox]:hover
+{
+    background-color: #c9c9c9;
+}
+
+input[type=checkbox]:active
+{
+    background-color: #a9a9a9;
+}
+
+input[type=checkbox]:checked
+{
+    background-color: #d7cc40;
+}
+
+input[type=checkbox]:checked:hover
+{
+    background-color: #e7dc50;
+}
+
+input[type=checkbox]:checked:active
+{
+    background-color: #c7bc30;
+}
+
+input[type=checkbox]:checked::after
+{
+    content: "🗸";
+    font-family: Verdana;
+    font-optical-sizing: auto;
+    font-weight: 900;
+    font-style: normal;
+    font-size: 26px;
+    position: relative;
+    top: -9px;
+    left: 2px;
+}
+
+.d-flex
+{
+    justify-content: space-between;
+    align-items: center;
+}
+
+.note-counter-tools
+{
+    display: flex;
+}
+
+#selected-notes-counter
+{
+    position: absolute;
+    top: 87vh;
+    z-index: 2;
+}
 
 @keyframes typewriter
 {

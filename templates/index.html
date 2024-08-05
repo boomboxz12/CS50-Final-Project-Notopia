@@ -10,7 +10,7 @@
     <p id="bg_color" class="invisible">{% if editing_mode %}{{ note[0][3] }}{% endif %}</p>
     <form id="form" class="note-form" action={% if editing_mode %}"/?id={{ note[0][0] }}"{% else %}"/"{% endif %} method="post">
         <label class="input-label text" for="title">Title</label>
-        <input class="note_data" autocomplete="off" id="title" name="note_title" placeholder="Untitled note" value={% if editing_mode %}"{{ note[0][1] }}"{% endif %}>
+        <input autofocus type="text" class="note_data" autocomplete="off" id="title" name="note_title" placeholder="Untitled note" value={% if editing_mode %}"{{ note[0][1] }}"{% endif %}>
         <label id="note_body_label" class="input-label text" for="note">Note</label>
         <textarea class="note_data" autocomplete="off" name="note_body" id="note" placeholder="Note">{% if editing_mode %}{{ note[0][2] }}{% endif %}</textarea>
         <div id="view_area" class="view_area note_data"></div>

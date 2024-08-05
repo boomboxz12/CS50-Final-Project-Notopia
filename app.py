@@ -1,3 +1,4 @@
+import os###
 import re
 import sqlite3
 
@@ -65,7 +66,7 @@ def index():
                 WHERE note_id = ?
                 """, (delete_note,))
             
-            flash(f"""Note "{note_title[:20]}{dots}" deleted!""")
+            flash(f"""Note "{note_title[:20]}{dots}" deleted.""")
 
             return redirect("/notes")
         # If there is only an id argument in the URL, then try reading the note from the database
@@ -309,6 +310,31 @@ def notes():
         None: "date_created DESC"
     }
 
+    # Is the user requesting note multi deletion? If so, which notes should I try to delete?
+    try:
+        notes_to_delete = tuple(int(i) for i in tuple(request.args.get("del").split(",")))
+        # If there are notes to multi delete, delete them from the database
+        if notes_to_delete:
+            # Placeholder question marks for the SQL query (a number of ?s matching the number of notes to delete)
+            qmarks = "?, " * len(notes_to_delete)
+            # Delete the last two characters of qmarks (the ", ")
+            qmarks = qmarks[:-2]
+
+            # Delete the notes from the database
+            sql(f"./databases/{session.get('username')}-notes.db", 
+                f"""
+                DELETE FROM notes
+                WHERE note_id IN ({qmarks})
+                """, notes_to_delete)
+            
+            flash("Note(s) deleted.")
+            
+    # AttributeError = note deletion not requested (no args)
+    except AttributeError:
+        pass
+    
+    
+
     # Read the notes from the user's notes database
     def get_notes():
         notes = sql(f"./databases/{session.get('username')}-notes.db", f"""
@@ -424,8 +450,12 @@ def signup():
             return apologize("signup", "This username is taken. Please choose another one.")
 
         # Inform the user that they have been signed up
-        flash(f'Account "{username}" signed up!')
+        flash(f'Account "{username}" signed up.')
 
         return redirect("/login")
 
     return render_template("signup.html")
+
+if __name__ == "__main__":###
+    port = int(os.environ.get("PORT", 5000))###
+    app.run(host='0.0.0.0', port=port)###
