@@ -11,27 +11,44 @@
         <div class="d-flex">
             <div class="toast-body"></div>
             <div class="toast-body note-counter-tools">
+                <svg data-bs-toggle="modal" data-bs-target="#tagsModal" class="tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M345 39.1L472.8 168.4c52.4 53 52.4 138.2 0 191.2L360.8 472.9c-9.3 9.4-24.5 9.5-33.9 .2s-9.5-24.5-.2-33.9L438.6 325.9c33.9-34.3 33.9-89.4 0-123.7L310.9 72.9c-9.3-9.4-9.2-24.6 .2-33.9s24.6-9.2 33.9 .2zM0 229.5L0 80C0 53.5 21.5 32 48 32l149.5 0c17 0 33.3 6.7 45.3 18.7l168 168c25 25 25 65.5 0 90.5L277.3 442.7c-25 25-65.5 25-90.5 0l-168-168C6.7 262.7 0 246.5 0 229.5zM144 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
                 <svg data-bs-toggle="modal" data-bs-target="#deleteConfirmation" class="editor-trash-can tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z"/></svg>
             </div>
         </div>
-    </div>
+        </div>
     </div>
     <div class="notes-page-top">
         <h2 class="text mb-5">My notes</h2>
         {% if notes %}
-            <p class="small-text">Sort notes by:</p>
-            <form action="/notes" method="get">
-                <select name="sort_notes_by" id="sort_notes_by">
-                    <option selected disabled>Sort notes by...</option>
-                    <option value="title-asc">Title (ascending)</option>
-                    <option value="title-desc">Title (descending)</option>
-                    <option value="creation-asc">Creation (ascending)</option>
-                    <option value="creation-desc">Creation (descending, default)</option>
-                    <option value="modification-asc">Last modification (ascending)</option>
-                    <option value="modification-desc">Last modification (descending)</option>
-                </select>
-                <button type="submit" id="sort_button" class="btn btn-warning mb-1">Sort</button>
-            </form>
+            <div class="tools notes-tools">
+                <svg id="show-sort-button" class="tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M183.6 469.6C177.5 476.2 169 480 160 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L128 365.7 128 64c0-17.7 14.3-32 32-32s32 14.3 32 32l0 301.7 32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 320c0-17.7 14.3-32 32-32l128 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9L429.3 416l50.7 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-128 0c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9L402.7 352 352 352c-17.7 0-32-14.3-32-32zM416 32c12.1 0 23.2 6.8 28.6 17.7l64 128 16 32c7.9 15.8 1.5 35-14.3 42.9s-35 1.5-42.9-14.3L460.2 224l-88.4 0-7.2 14.3c-7.9 15.8-27.1 22.2-42.9 14.3s-22.2-27.1-14.3-42.9l16-32 64-128C392.8 38.8 403.9 32 416 32zM395.8 176l40.4 0L416 135.6 395.8 176z"/></svg>
+                <svg id="show-filter-button" class="tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M345 39.1L472.8 168.4c52.4 53 52.4 138.2 0 191.2L360.8 472.9c-9.3 9.4-24.5 9.5-33.9 .2s-9.5-24.5-.2-33.9L438.6 325.9c33.9-34.3 33.9-89.4 0-123.7L310.9 72.9c-9.3-9.4-9.2-24.6 .2-33.9s24.6-9.2 33.9 .2zM0 229.5L0 80C0 53.5 21.5 32 48 32l149.5 0c17 0 33.3 6.7 45.3 18.7l168 168c25 25 25 65.5 0 90.5L277.3 442.7c-25 25-65.5 25-90.5 0l-168-168C6.7 262.7 0 246.5 0 229.5zM144 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+            </div>
+            <div id="sort-notes-container">
+                <p><strong>Sort notes by:</strong></p>
+                <form action="/notes" method="get">
+                    <select name="sort_notes_by" id="sort_notes_by">
+                        <option selected disabled>Sort notes by...</option>
+                        <option value="title-asc">Title (ascending)</option>
+                        <option value="title-desc">Title (descending)</option>
+                        <option value="creation-asc">Creation (ascending)</option>
+                        <option value="creation-desc">Creation (descending, default)</option>
+                        <option value="modification-asc">Last modification (ascending)</option>
+                        <option value="modification-desc">Last modification (descending)</option>
+                    </select>
+                    <button type="submit" id="sort_button" class="btn btn-warning mb-1">Sort</button>
+                </form>
+            </div>
+            <div id="filter-notes-container">
+                <p><strong>Filter notes by tag(s):</strong></p>
+                <form action="/notes" method="get">
+                    <div class="tags-list">
+                        <p>Nothing here yet (placeholder).</p>
+                    </div>
+                    <button type="submit" id="filter_button" class="btn btn-warning mb-4">Filter</button>
+                </form>
+            </div>
+            
         {% endif %}
     </div>
     <div class="notes-flex">
@@ -66,6 +83,35 @@
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, keep note</button>
             <a id="modal-confirm-delete-button" href=""><button type="button" class="btn btn-warning" data-bs-dismiss="modal">Yes, delete note</button></a>
+            </div>
+        </div>
+        </div>
+    </div>
+    <div class="modal" id="tagsModal" tabindex="-1" aria-labelledby="tagsModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h1 class="modal-title fs-5">Choose tags</h1>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="modal-body2" class="modal-body">
+                <form action="/tags" method="post">
+                    <label class="text mb-2" for="create-tag-input">Create new tags (separated with commas)</label>
+                    <input type="text" id="create-tag-input" name="tag_title" placeholder="Tag 1, Tag2, Tag3,...">
+                    <input type="text" id="selected_notes" class="invisible" name="selected_notes">
+                    <p class="border border-secondary"></p>
+                    Add the selected note(s) to a tag or tags: <br>
+                    Add the selected note(s) to a tag or tags: <br>
+                    Add the selected note(s) to a tag or tags: <br>
+                    Add the selected note(s) to a tag or tags: <br>
+                    Add the selected note(s) to a tag or tags: <br>
+                    Add the selected note(s) to a tag or tags: <br>
+                    placeholder
+                </form>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <a id="modal-confirm-add-tags-button" href=""><button type="button" class="btn btn-warning" data-bs-dismiss="modal">Add</button></a>
             </div>
         </div>
         </div>

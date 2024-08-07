@@ -1,4 +1,3 @@
-import os###
 import re
 import sqlite3
 
@@ -42,9 +41,8 @@ def index():
 
     # try except to prevent users who aren't logged in from causing errors
     try:
-        # If the del argument is found, delete the note TODO: DELETE IMAGES
+        # If the del argument is found, delete the note
         if delete_note:
-
             # Reading the note title for the flash message
             note_title = sql(f"./databases/{session['username']}-notes.db",
                             """
@@ -275,7 +273,6 @@ def login():
         return redirect("/notes")
     
 
-
 @app.route("/logout")
 def logout():
     # If the user is logged in, forget their session data then redirect to /login
@@ -321,13 +318,15 @@ def notes():
             qmarks = qmarks[:-2]
 
             # Delete the notes from the database
-            sql(f"./databases/{session.get('username')}-notes.db", 
-                f"""
-                DELETE FROM notes
-                WHERE note_id IN ({qmarks})
-                """, notes_to_delete)
-            
-            flash("Note(s) deleted.")
+            deletion_done = bool(sql(f"./databases/{session.get('username')}-notes.db", 
+                                     f"""
+                                     DELETE FROM notes
+                                     WHERE note_id IN ({qmarks})
+                                     """, notes_to_delete).rowcount)
+            # Only inform the user about deletion(s) after actual deletions (and not when visiting /notes?del=X where X is the ID of a nonexistent note)
+            if deletion_done:
+                flash("Note(s) deleted.")
+                return redirect("/notes")
             
     # AttributeError = note deletion not requested (no args)
     except AttributeError:
@@ -356,7 +355,6 @@ def notes():
     return render_template("notes.html", notes=get_notes()) # Calling get_notes again to reread the notes after deleting any empty notes
     
     
-
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     # User reached route via GET
@@ -409,41 +407,43 @@ def signup():
         except sqlite3.OperationalError:
             pass
 
-        # Try to add the user to the users database
         try:
+            # Try to add the user to the users database
             sql("users.db", """
                 INSERT INTO users (username, hash)
                 VALUES (?, ?)
                 """, (username, generate_password_hash(password),))
             
-            # Make a database for the user's notes and another for images
+            # Make a database for the user's notes and tags
             with sqlite3.connect(f"./databases/{username}-notes.db") as con:
                 cur = con.cursor()
-                cur.execute("""
-                            CREATE TABLE notes
-                            (
-                                note_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-                                user_id INTEGER NOT NULL,
-                                note_title TEXT,
-                                note_body TEXT,
-                                date_created NUMERIC NOT NULL,
-                                date_modified NUMERIC NOT NULL,
-                                bg_color TEXT DEFAULT 'dark' NOT NULL,
-                                tags TEXT,
-                                trashed INTEGER DEFAULT 0
-                            );
-                            """)
-            with sqlite3.connect(f"./databases/{username}-images.db") as con:
-                cur = con.cursor()
-                cur.execute("""
-                            CREATE TABLE images
-                            (
-                                image_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-                                note_id INTEGER NOT NULL,
-                                image BLOB NOT NULL,
-                                FORIEGN KEY note_id REFERENCES notes(note_id)
-                            );
-                            """)
+                cur.executescript("""
+                                    BEGIN;
+                                    CREATE TABLE notes
+                                    (
+                                        note_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                                        user_id INTEGER NOT NULL,
+                                        note_title TEXT,
+                                        note_body TEXT,
+                                        date_created NUMERIC NOT NULL,
+                                        date_modified NUMERIC NOT NULL,
+                                        bg_color TEXT DEFAULT 'dark' NOT NULL
+                                    );
+                                    CREATE TABLE tags_notes
+                                    (
+                                        tag_id INTEGER,
+                                        note_id INTEGER,
+                                        PRIMARY KEY (tag_id, note_id),
+                                        FOREIGN KEY (tag_id) REFERENCES tags (tag_id),
+                                        FOREIGN KEY (note_id) REFERENCES notes (note_id)
+                                    );
+                                    CREATE TABLE tags
+                                    (
+                                        tag_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+                                        tag_title TEXT NOT NULL
+                                    );
+                                    COMMIT;
+                                    """)
             
         # If an IntegrityError is encountered (i.e., the username is taken), inform the user with an error
         except sqlite3.IntegrityError:
@@ -456,6 +456,8 @@ def signup():
 
     return render_template("signup.html")
 
-if __name__ == "__main__":###
-    port = int(os.environ.get("PORT", 5000))###
-    app.run(host='0.0.0.0', port=port)###
+
+# Handle tags (TODO)
+@app.route("/tags", methods = ["POST"])
+def tags():
+    return "", 204

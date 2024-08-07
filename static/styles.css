@@ -168,7 +168,7 @@ textarea
     top: 64px;
 }
 
-.note-form
+.note-editor
 {
     display: flex;
     flex-direction: column;
@@ -271,7 +271,8 @@ textarea
     margin: 0 auto;
     flex-flow: row wrap;
     justify-content: space-around;
-    gap: 10px
+    gap: 10px;
+    width: fit-content;
 }
 
 .tool
@@ -290,7 +291,11 @@ textarea
 
 .invisible
 {
-    display: none;
+    display: none !important;
+    margin: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
 }
 
 .dropdown-menu.show
@@ -524,6 +529,28 @@ input[type=checkbox]:checked::after
     position: absolute;
     top: 87vh;
     z-index: 2;
+}
+
+#create-tag-input
+{
+    width: 100%;
+}
+
+.tags-list
+{
+    max-height: 100px;
+    overflow: scroll;
+}
+
+#sort-notes-container, #filter-notes-container
+{
+    display: none;
+}
+
+.notes-tools
+{
+    position: relative;
+    top: -1.5rem;
 }
 
 @keyframes typewriter

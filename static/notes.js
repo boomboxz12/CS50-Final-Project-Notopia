@@ -5,6 +5,10 @@ const notes = document.querySelectorAll(".note-flex-item");
 const selectedNotesCounter = document.getElementById("selected-notes-counter");
 const modalBody = document.getElementById("modal-body");
 const confirmDelete = document.getElementById("modal-confirm-delete-button");
+const sortNotesContainer = document.getElementById("sort-notes-container");
+const filterNotesContainer = document.getElementById("filter-notes-container");
+const showSortButton = document.getElementById("show-sort-button");
+const showFilterButton = document.getElementById("show-filter-button");
 
 // Change the colors of the notes in te notes grid according to the database's "bg_color" column
 notes.forEach((colorChange))
@@ -90,3 +94,20 @@ window.onbeforeunload = function() {
         }
     }
 }
+
+// Show/hide the note sorting/filtering options when clicking the respective button
+let displayModes = ["none", "inline"];
+let numberOfSortClicks = 0;
+let numberOfFilterClicks = 0;
+showSortButton.addEventListener("click", () => {
+    numberOfSortClicks++;
+    numberOfFilterClicks = 0;
+    filterNotesContainer.style.display = "none";
+    sortNotesContainer.style.display = displayModes[numberOfSortClicks % 2];
+});
+showFilterButton.addEventListener("click", () => {
+    numberOfSortClicks = 0;
+    numberOfFilterClicks++;
+    filterNotesContainer.style.display = displayModes[numberOfFilterClicks % 2];
+    sortNotesContainer.style.display = "none";
+});
