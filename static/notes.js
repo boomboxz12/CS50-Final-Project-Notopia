@@ -5,10 +5,14 @@ const notes = document.querySelectorAll(".note-flex-item");
 const selectedNotesCounter = document.getElementById("selected-notes-counter");
 const modalBody = document.getElementById("modal-body");
 const confirmDelete = document.getElementById("modal-confirm-delete-button");
+const confirmLeave = document.querySelectorAll(".confirm-leave");
 const sortNotesContainer = document.getElementById("sort-notes-container");
 const filterNotesContainer = document.getElementById("filter-notes-container");
 const showSortButton = document.getElementById("show-sort-button");
 const showFilterButton = document.getElementById("show-filter-button");
+const selectedNotesInput = document.getElementById("selected-notes");
+const modalTags = document.querySelectorAll(".notes-tag");
+const selectedModalTagsInput = document.getElementById("selected-modal-tags");
 
 // Change the colors of the notes in te notes grid according to the database's "bg_color" column
 notes.forEach((colorChange))
@@ -56,6 +60,9 @@ function noteSelector(note) {
             selectedNotes.splice(selectedNotes.indexOf(note_id), 1);
         }
 
+        // Populate the #selected-notes input element with the selectedNotes array for use when associating notes with tags
+        selectedNotesInput.value = selectedNotes;
+
         // Change href on the modal dialog (confirm deletion) to enable the deletion of selected notes
         confirmDelete.href = "/notes?del=" + selectedNotes;
         
@@ -82,13 +89,16 @@ function noteSelector(note) {
 }
 
 // Make sure the user doesn't accidentally click out of the page when selecting a note or notes
-var deletionConfirmed = false; // By default, treat the deletion request as unconfirmed and warn the user
-confirmDelete.addEventListener("click", () => {
-    deletionConfirmed = true;
-})
+var leavingConfirmed = false; // By default, warn the user when leaving the page when one or more notes are selected unless confrimed
+confirmLeave.forEach(dontWarn)
+function dontWarn(item) {
+    item.addEventListener("click", () => {
+        leavingConfirmed = true;
+    })
+}
 window.onbeforeunload = function() {
-    // Only warn the user if they have notes selected and if the deletionConfirmed variable is false
-    if (!deletionConfirmed) {
+    // Only warn the user if they have notes selected and if the leavingConfirmed variable is false
+    if (!leavingConfirmed) {
         if (selectedNotes.length > 0) {
             return "You currently have a note or more selected. Are you sure you want to leave?";
         }
@@ -111,3 +121,24 @@ showFilterButton.addEventListener("click", () => {
     filterNotesContainer.style.display = displayModes[numberOfFilterClicks % 2];
     sortNotesContainer.style.display = "none";
 });
+
+// Array for keeping track of the tags selected in the "add selected note(s) to tag(s)" modal dialog
+let selectedModalTags = [];
+
+// Add selected modal tags to the array and remove deselected ones
+modalTags.forEach(modalTagSelector)
+function modalTagSelector(modalTagContainer) {
+    const tagInput = modalTagContainer.querySelector("input");
+    const tagLabel = modalTagContainer.querySelector("label");
+    tagInput.addEventListener("input", () => {
+        if (tagInput.checked == true) {
+            selectedModalTags.push(tagLabel.innerHTML);
+        }
+        else {
+            selectedModalTags.splice(selectedModalTags.indexOf(tagLabel.innerHTML), 1);
+        }
+        selectedModalTagsInput.value = selectedModalTags;
+        console.log(selectedModalTagsInput.value)///
+    });
+}
+

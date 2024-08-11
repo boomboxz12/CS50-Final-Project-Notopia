@@ -63,6 +63,14 @@
             <p></p>
         {% endif %}
     </div>
+    {% if editing_mode and note[0][6] %}
+        <div class="editor-tags mt-2">
+            Tags:
+        {% for tag in note[0][6] %}
+            <p class="small-text">{{ tag }}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
 {% endblock %}
 {% block script %}
     <script type="module" src="../static/index.js"></script>

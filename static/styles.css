@@ -464,15 +464,19 @@ input[type=checkbox]
 {
     width: 24px;
     height: 24px;
+    appearance: none;
+    background-color: #b8b8b8;
+    border-radius: 20%;
+    color: #212121
+}
+
+.note-flex-item > input[type=checkbox]
+{
     position: relative;
     display: flex;
     top: -253px;
     left: 10px;
     z-index: 1;
-    appearance: none;
-    background-color: #b8b8b8;
-    border-radius: 20%;
-    color: #212121
 }
 
 input[type=checkbox]:hover
@@ -538,8 +542,26 @@ input[type=checkbox]:checked::after
 
 .tags-list
 {
-    max-height: 100px;
-    overflow: scroll;
+    max-height: 15rem;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    width: 17.75rem;
+    margin: 0 auto;
+}
+
+.notes-tag > input
+{
+    text-align: left;
+    display: flex;
+    position: relative;
+    top: 1.6rem;
+}
+
+.notes-tag > label
+{
+    text-align: left;
+    position: relative;
+    left: 2rem;
 }
 
 #sort-notes-container, #filter-notes-container
@@ -551,6 +573,20 @@ input[type=checkbox]:checked::after
 {
     position: relative;
     top: -1.5rem;
+}
+
+.editor-tags
+{
+    cursor: default;
+}
+
+.editor-tags > p
+{
+    display: inline;
+    background-color: #343434;
+    padding: 0.2rem 0.3rem 0.4rem;
+    border-radius: 0.5rem;
+    cursor: default;
 }
 
 @keyframes typewriter

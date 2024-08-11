@@ -67,7 +67,8 @@ def index():
             flash(f"""Note "{note_title[:20]}{dots}" deleted.""")
 
             return redirect("/notes")
-        # If there is only an id argument in the URL, then try reading the note from the database
+        
+        # If there is only an id argument in the URL (no del argument), then try reading the note from the database
         elif note_id:
             try:
                 note = sql(f"./databases/{session['username']}-notes.db",
@@ -76,9 +77,34 @@ def index():
                         FROM notes
                         WHERE note_id = ?
                         """, (note_id,)).fetchall()
+                note[0] = list(note[0])
             # KeyError = Not logged in
             except KeyError:
                 return apologize("/", "Please log in first.")
+            
+            # Read the note's tags from the database
+            note_tags = sql(f"./databases/{session['username']}-notes.db", 
+                             """
+                             SELECT tag_title
+                             FROM tags
+                             WHERE tag_id IN (
+                                                SELECT tag_id
+                                                FROM tags_notes
+                                                WHERE note_id = ?
+                                            )
+                             ORDER BY tag_title COLLATE NOCASE ASC
+                             """, (note_id,)).fetchall()
+            
+            # List for converting note_tags into a list of elements each of which is one of the note's tags
+            note_tags_list = []
+
+            # Place each tag into the list above
+            for i in note_tags:
+                note_tags_list.append(i[0])
+
+            # Place the tags list into the note variable
+            note[0].append(note_tags_list)
+
         else:
             note = None
     # KeyError = Not logged in
@@ -101,6 +127,7 @@ def index():
 
 # Route for autosaving notes as the user types
 @app.route("/autosave", methods=["POST"])
+@login_required
 def autosave():
     # Getting the necessary data
     results = request.get_json()
@@ -351,8 +378,17 @@ def notes():
                 DELETE FROM notes
                 WHERE note_id = ?
                 """, (note[0],))
+            
+    tags = sql(f"./databases/{session.get('username')}-notes.db", f"""
+               SELECT tag_title
+               FROM tags
+               ORDER BY tag_title COLLATE NOCASE ASC
+               """).fetchall()
+    
+    print(tags)###
+    print(type(tags))###
                 
-    return render_template("notes.html", notes=get_notes()) # Calling get_notes again to reread the notes after deleting any empty notes
+    return render_template("notes.html", notes=get_notes(), tags=tags) # Calling get_notes again to reread the notes after deleting any empty notes
     
     
 @app.route("/signup", methods=["GET", "POST"])
@@ -440,7 +476,7 @@ def signup():
                                     CREATE TABLE tags
                                     (
                                         tag_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
-                                        tag_title TEXT NOT NULL
+                                        tag_title TEXT NOT NULL UNIQUE
                                     );
                                     COMMIT;
                                     """)
@@ -457,7 +493,65 @@ def signup():
     return render_template("signup.html")
 
 
-# Handle tags (TODO)
+# Handle tags
 @app.route("/tags", methods = ["POST"])
+@login_required
 def tags():
-    return "", 204
+    # Receive the tag title(s) entered/selected by the user and the selected notes
+    tag_title = request.form.get("tag-title") # Newly created tags
+    selected_modal_tags = request.form.get("selected-modal-tags").split(",") # Already created tags that are selected by checking the checkmark
+    selected_notes = request.form.get("selected-notes").split(",")
+
+    # Initially, the tag_list is empty
+    tags_list = []
+
+    # If the new tags are alphanumeric and are separated by spaces, find all regex matches to get a list of just the tags
+    if tag_title.replace(" ", "").isalnum():
+        tags_list = re.findall("(\w+)[^ ]*", tag_title)
+
+    # In the case of missing or invalid new tags, inform the user with an error
+    if not tags_list and tag_title:
+        return apologize("/notes", """Please enter a valid title for the tag you want to create.
+                         You can also enter multiple titles separated by spaces to create multiple tags.
+                         Only alphanumeric characters are allowed in tag titles.""")
+    
+    # Insert newly created tag(s) into the database
+    try:
+        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as con:
+            cur = con.cursor()
+            cur.execute("BEGIN;")
+            for i in tags_list:
+                cur.execute(
+                    """
+                    INSERT INTO tags (tag_title)
+                    VALUES (?)
+                    """, (i,))
+            cur.execute("COMMIT;")
+    except sqlite3.IntegrityError:
+        return apologize("/notes", "You can't have more than one tag with the same name.")
+    
+    # Extend the tags_list so it covers both newly created tags and existing tags for association with the selected notes
+    tags_list.extend(selected_modal_tags)
+
+    # Associate the notes with their tags (new and existing) by inserting into tags_notes
+    try:
+        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as con:
+            cur = con.cursor()
+            if selected_notes:
+                for i in selected_notes:
+                    for j in tags_list:
+                        cur.execute(
+                            f"""
+                            INSERT INTO tags_notes (tag_id, note_id)
+                            VALUES ((
+                                    SELECT tag_id
+                                    FROM tags
+                                    WHERE tag_title = '{j}'
+                                    ),
+                                    {i})
+                            """)
+    # IntegrityError = The user attempts to add a tag to a note when that tag is already added to the note (associating the note with a tag it's already associated with)
+    except sqlite3.IntegrityError:
+        return apologize("/notes", "This note has already been added to that tag.")
+
+    return redirect("/notes")

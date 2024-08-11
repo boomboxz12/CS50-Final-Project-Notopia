@@ -42,8 +42,15 @@
             <div id="filter-notes-container">
                 <p><strong>Filter notes by tag(s):</strong></p>
                 <form action="/notes" method="get">
-                    <div class="tags-list">
-                        <p>Nothing here yet (placeholder).</p>
+                    <div class="tags-list pb-4">
+                        {% if tags %}
+                            {% for tag in tags %}
+                                <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
+                                <label for="{{ tag[0] }}">{{ tag[0][:20] }}</label>
+                            {% endfor %}
+                        {% else %}
+                            <p>There are currently no tags to display. Create at least one tag and it will show up here.</p>
+                        {% endif %}
                     </div>
                     <button type="submit" id="filter_button" class="btn btn-warning mb-4">Filter</button>
                 </form>
@@ -82,7 +89,7 @@
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, keep note</button>
-            <a id="modal-confirm-delete-button" href=""><button type="button" class="btn btn-warning" data-bs-dismiss="modal">Yes, delete note</button></a>
+            <a id="modal-confirm-delete-button" href=""><button type="button" class="btn btn-warning confirm-leave" data-bs-dismiss="modal">Yes, delete note</button></a>
             </div>
         </div>
         </div>
@@ -95,23 +102,30 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="modal-body2" class="modal-body">
-                <form action="/tags" method="post">
-                    <label class="text mb-2" for="create-tag-input">Create new tags (separated with commas)</label>
-                    <input type="text" id="create-tag-input" name="tag_title" placeholder="Tag 1, Tag2, Tag3,...">
-                    <input type="text" id="selected_notes" class="invisible" name="selected_notes">
+                <form id="add-tags" action="/tags" method="post">
+                    <label class="text mb-2" for="create-tag-input">Create new tags (separated with spaces). Only alphanumeric characters allowed.</label>
+                    <input autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
+                    <input type="text" id="selected-notes" class="invisible" name="selected-notes" value="">
                     <p class="border border-secondary"></p>
-                    Add the selected note(s) to a tag or tags: <br>
-                    Add the selected note(s) to a tag or tags: <br>
-                    Add the selected note(s) to a tag or tags: <br>
-                    Add the selected note(s) to a tag or tags: <br>
-                    Add the selected note(s) to a tag or tags: <br>
-                    Add the selected note(s) to a tag or tags: <br>
-                    placeholder
+                    {% if tags %}<p>Created tags:</p>{% endif %}
+                    <div id="tags-list" class="tags-list pb-4">
+                        {% if tags %}
+                            {% for tag in tags %}
+                                <div class="notes-tag">
+                                    <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
+                                    <label for="{{ tag[0] }}">{{ tag[0][:20] }}</label>
+                                </div>
+                            {% endfor %}
+                            <input type="text" id="selected-modal-tags" class="invisible" name="selected-modal-tags" value="">
+                        {% else %}
+                            <p>There are currently no tags to display. Create at least one tag and it will show up here.</p>
+                        {% endif %}
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <a id="modal-confirm-add-tags-button" href=""><button type="button" class="btn btn-warning" data-bs-dismiss="modal">Add</button></a>
+            <button type="submit" form="add-tags" class="btn btn-warning confirm-leave" data-bs-dismiss="modal">Add</button>
             </div>
         </div>
         </div>
