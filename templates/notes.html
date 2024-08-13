@@ -41,12 +41,14 @@
             </div>
             <div id="filter-notes-container">
                 <p><strong>Filter notes by tag(s):</strong></p>
-                <form action="/notes" method="get">
+                <form action="/notes" method="post">
                     <div class="tags-list pb-4">
                         {% if tags %}
                             {% for tag in tags %}
-                                <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
-                                <label for="{{ tag[0] }}">{{ tag[0][:20] }}</label>
+                                <div class="filter-by-tag">
+                                    <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
+                                    <label for="{{ tag[0] }}">{{ tag[0][:20] }}{% if tag[0]|length > 20 %}...{% endif %}</label>
+                                </div>
                             {% endfor %}
                         {% else %}
                             <p>There are currently no tags to display. Create at least one tag and it will show up here.</p>
@@ -55,9 +57,11 @@
                     <button type="submit" id="filter_button" class="btn btn-warning mb-4">Filter</button>
                 </form>
             </div>
-            
         {% endif %}
     </div>
+    {% if filter_information %}
+        <p>{{ filter_information }}</p>
+    {% endif %}
     <div class="notes-flex">
         {% for note in notes %}
             <a href="/?id={{ note[0] }}" class="note-flex-item">
@@ -110,10 +114,11 @@
                     {% if tags %}<p>Created tags:</p>{% endif %}
                     <div id="tags-list" class="tags-list pb-4">
                         {% if tags %}
+                            <p>Choose the tag(s) to which you would like to link the selected note(s):</p>
                             {% for tag in tags %}
                                 <div class="notes-tag">
                                     <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
-                                    <label for="{{ tag[0] }}">{{ tag[0][:20] }}</label>
+                                    <label for="{{ tag[0] }}">{{ tag[0][:20] }}{% if tag[0]|length > 20 %}...{% endif %}</label>
                                 </div>
                             {% endfor %}
                             <input type="text" id="selected-modal-tags" class="invisible" name="selected-modal-tags" value="">

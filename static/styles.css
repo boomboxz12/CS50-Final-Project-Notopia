@@ -545,11 +545,11 @@ input[type=checkbox]:checked::after
     max-height: 15rem;
     overflow-y: scroll;
     overflow-x: hidden;
-    width: 17.75rem;
+    width: 16.875rem;
     margin: 0 auto;
 }
 
-.notes-tag > input
+.notes-tag > input, .filter-by-tag > input
 {
     text-align: left;
     display: flex;
@@ -557,7 +557,7 @@ input[type=checkbox]:checked::after
     top: 1.6rem;
 }
 
-.notes-tag > label
+.notes-tag > label, .filter-by-tag > label
 {
     text-align: left;
     position: relative;
@@ -575,18 +575,27 @@ input[type=checkbox]:checked::after
     top: -1.5rem;
 }
 
-.editor-tags
+.editor-tags-container
 {
     cursor: default;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    min-height: 2rem;
+    max-height: 6rem;
+    overflow: scroll;
+    align-items: center;
 }
 
-.editor-tags > p
+.editor-tags
 {
     display: inline;
     background-color: #343434;
-    padding: 0.2rem 0.3rem 0.4rem;
+    padding: 0.2rem 1.3rem 0.4rem;
+    margin-bottom: 0rem;
     border-radius: 0.5rem;
-    cursor: default;
+    cursor: pointer;
 }
 
 @keyframes typewriter
@@ -617,5 +626,9 @@ input[type=checkbox]:checked::after
     .title.title-276
     {
         max-width: 142px;
+    }
+    .editor-tags-container
+    {
+        min-height: 4rem;
     }
 }

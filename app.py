@@ -317,11 +317,38 @@ def logout():
     
 
 # Display the user's saved notes and delete any empty ones in the database
-@app.route("/notes")
+@app.route("/notes", methods=["GET", "POST"])
 @login_required
 def notes():
     # Has the user requested that I sort their notes?
     sort = request.args.get("sort_notes_by")
+
+    # Has the user requested that I filter their notes by a tag or tags?
+    filter = request.form
+    filter_string = ""
+    filter_information = ""
+    if filter:
+        # The number of question marks (parameters) to be passed to the SQL query is equal to the number of keys received
+        qmarks = "?, " * len(filter.keys())
+        qmarks = qmarks[:-2]
+        # A string to be added to the the SQL query under the function get_notes below
+        filter_string = f"""
+        WHERE note_id IN (
+            SELECT note_id
+            FROM tags_notes
+            WHERE tag_id IN (
+                SELECT tag_id
+                FROM tags
+                WHERE tag_title IN ({qmarks})
+            )
+        )
+        """
+        filtered_by = ""
+        for i in filter.keys():
+            filtered_by += i + ", "
+        filtered_by = filtered_by[:-2] + "."
+        filter_information = f"Your notes are filtered by the following tags: {filtered_by}"
+        
 
     # Dictionary used to modify the SQL query when sorting notes
     sort_dict = {
@@ -359,15 +386,14 @@ def notes():
     except AttributeError:
         pass
     
-    
-
     # Read the notes from the user's notes database
     def get_notes():
         notes = sql(f"./databases/{session.get('username')}-notes.db", f"""
                 SELECT note_id, note_title, note_body, bg_color, date_created, date_modified
                 FROM notes
+                {filter_string}
                 ORDER BY {sort_dict[sort]}
-                """).fetchall()
+                """, tuple(filter.keys())).fetchall()
         return notes
     
     # Delete any existing empty notes
@@ -384,11 +410,8 @@ def notes():
                FROM tags
                ORDER BY tag_title COLLATE NOCASE ASC
                """).fetchall()
-    
-    print(tags)###
-    print(type(tags))###
                 
-    return render_template("notes.html", notes=get_notes(), tags=tags) # Calling get_notes again to reread the notes after deleting any empty notes
+    return render_template("notes.html", notes=get_notes(), tags=tags, filter_information=filter_information) # Calling get_notes again to reread the notes after deleting any empty notes
     
     
 @app.route("/signup", methods=["GET", "POST"])
@@ -497,17 +520,21 @@ def signup():
 @app.route("/tags", methods = ["POST"])
 @login_required
 def tags():
+    # Creating tags and adding notes to them
     # Receive the tag title(s) entered/selected by the user and the selected notes
     tag_title = request.form.get("tag-title") # Newly created tags
-    selected_modal_tags = request.form.get("selected-modal-tags").split(",") # Already created tags that are selected by checking the checkmark
-    selected_notes = request.form.get("selected-notes").split(",")
+    selected_modal_tags = request.form.get("selected-modal-tags") # Already created tags that are selected by checking the checkmark
+    if selected_modal_tags: selected_modal_tags = selected_modal_tags.split(",")
+    selected_notes = request.form.get("selected-notes")
+    if selected_notes: selected_notes = selected_notes.split(",")
 
     # Initially, the tag_list is empty
     tags_list = []
 
     # If the new tags are alphanumeric and are separated by spaces, find all regex matches to get a list of just the tags
-    if tag_title.replace(" ", "").isalnum():
-        tags_list = re.findall("(\w+)[^ ]*", tag_title)
+    if tag_title:
+        if tag_title.replace(" ", "").isalnum():
+            tags_list = re.findall("(\w+)[^ ]*", tag_title)
 
     # In the case of missing or invalid new tags, inform the user with an error
     if not tags_list and tag_title:
@@ -531,7 +558,7 @@ def tags():
         return apologize("/notes", "You can't have more than one tag with the same name.")
     
     # Extend the tags_list so it covers both newly created tags and existing tags for association with the selected notes
-    tags_list.extend(selected_modal_tags)
+    if selected_modal_tags: tags_list.extend(selected_modal_tags)
 
     # Associate the notes with their tags (new and existing) by inserting into tags_notes
     try:
@@ -553,5 +580,23 @@ def tags():
     # IntegrityError = The user attempts to add a tag to a note when that tag is already added to the note (associating the note with a tag it's already associated with)
     except sqlite3.IntegrityError:
         return apologize("/notes", "This note has already been added to that tag.")
+    
 
-    return redirect("/notes")
+    # Removing a note from a tag when the tag is clicked when the note is open in the editor
+    if request.is_json:
+        results = request.get_json()
+        tag_title_to_delete = results.get("tagTitle")
+        current_note_id = results.get("noteId")
+
+        sql(f"./databases/{session['username']}-notes.db", 
+            """
+            DELETE FROM tags_notes
+            WHERE note_id = ?
+            AND tag_id = (
+                SELECT tag_id
+                FROM tags
+                WHERE tag_title = ?
+            )
+            """, (int(current_note_id), tag_title_to_delete,))
+
+    return "", 204

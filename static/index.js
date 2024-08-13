@@ -14,6 +14,9 @@ const bgColor = document.getElementById("bg_color").innerHTML;
 const viewButton = document.getElementById("view_button");
 const viewArea = document.getElementById("view_area");
 const noteBodyLabel = document.getElementById("note_body_label");
+const tool = document.querySelectorAll(".tool");
+const editorTagsContainer = document.getElementById("editor-tags-container");
+const editorTags = document.querySelectorAll(".editor-tags");
 
 // Is the user logged in?
 const loggedIn = !Boolean(document.getElementById("saving_disabled_message").innerHTML);
@@ -77,7 +80,29 @@ if (loggedIn) {
     });
 }
 
-// When the user selects a new background color for a note, send a POST request to /autosave to save it and immediately change to the color
+// Function for changing all the background colors to whatever the user wants
+function changeAllColors(colorSource) {
+    contentDiv.style.backgroundColor = bgColors[colorSource][0];
+    noteData.forEach(colorChange);
+    tool.forEach(colorChange);
+    editorTags.forEach(colorChange);
+    function colorChange(element) {
+        if (element.nodeName == "svg") {
+            element.style.backgroundColor = bgColors[colorSource][0];
+            element.addEventListener("mouseenter", () => {
+                element.style.backgroundColor = bgColors[colorSource][1];
+            });
+            element.addEventListener("mouseleave", () => {
+                element.style.backgroundColor = bgColors[colorSource][0];
+            });
+        }
+        else {
+            element.style.backgroundColor = bgColors[colorSource][1];
+        }
+    }
+}
+
+// When the user selects a new background color for a note, send a POST request to /autosave to save it and immediately change to that color
 bgSelector.forEach(bgSelectorFunction)
 function bgSelectorFunction(item) {
     const newColor = item.querySelector("p").innerHTML
@@ -87,20 +112,33 @@ function bgSelectorFunction(item) {
             body: JSON.stringify({"note_id": noteId.innerHTML, "bg_color": newColor}),
             headers: {"Content-Type": "application/json"}
         });
-        contentDiv.style.backgroundColor = bgColors[newColor][0];
-        noteData.forEach((colorChange))
-        function colorChange(element) {
-            element.style.backgroundColor = bgColors[newColor][1];
-        }
+        changeAllColors(newColor);
     });
 }
 
 // Upon loading a note in the editor, change the note background color according to what's in the database
 try {
-    contentDiv.style.backgroundColor = bgColors[bgColor][0];
-    noteData.forEach((colorChange))
-    function colorChange(element) {
-        element.style.backgroundColor = bgColors[bgColor][1];
-}}
+    changeAllColors(bgColor);
+}
 // Prevents "Uncaught TypeError: (intermediate value)[bgColor] is undefined"
 catch (error) {}
+
+// Send a POST request to delete a tag when clicking on it, and make the tag disappear from the list of tags
+editorTags.forEach(deleteTag);
+let editorTagsNum = editorTags.length; // Variable used to keep track of the number of tags displayed in the note editor (used for making the tags container invisible when the number of tags reaches zero from deletions)
+function deleteTag(tag) {
+    tag.addEventListener("click", async () => {
+        await fetch("/tags", {
+            method: "POST",
+            body: JSON.stringify({"tagTitle": tag.innerHTML, "noteId": noteId.innerHTML}),
+            headers: {"Content-Type": "application/json", "Accept": "application/json"}
+        });
+        editorTagsNum--;
+        // Make the tag disappear upon being clicked
+        tag.classList.add("invisible");
+        // Make the editor tags container disappear when there are no tags left
+        if (editorTagsNum == 0) {
+            editorTagsContainer.classList.add("invisible");
+        }
+    });
+}
