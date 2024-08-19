@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    My tags
+{% endblock %}
+
+{% block main %}
+    <div class="accordion-container">
+        <div class="accordion" id="tagsAccordion">
+            <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                View tags
+                </button>
+            </h2>
+            <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
+                <div class="accordion-body">
+                    {% if tags_dict %}
+                        <strong>Here are your created tags and the notes linked with them. Tip: If you have too many tags and/or notes, you can use your browser's "Find in page" feature to look for exactly what you want.</strong>
+                        <p></p>
+                        <ul>
+                            {% for key in tags_dict.keys() %}
+                                <li><strong>{{ key[:20] }}{% if key|length > 20 %}...{% endif %}{% if tags_dict[key] %}:{% endif %}</strong></li>
+                                    <ul>
+                                        {% for note in tags_dict[key] %}
+                                            <li class="text">{{ note }}</li>
+                                        {% endfor %}
+                                    </ul>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        There are no tags to display. Please create at least one tag below and it will appear here.
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+            <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                Create tags
+                </button>
+            </h2>
+            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
+                <div class="accordion-body">
+                    <ul class="mb-0">
+                        <strong>Instructions:</strong>
+                        <li class="text">Tags can be used to categorize notes that have things in common between them for better organization.</li>
+                        <li class="text">You can create a new (empty) tag or tags by entering the names of the tags you want to create (separated by spaces) in the field below.</li>
+                        <li class="text">Only alphanumeric characters are allowed in tag names.</li>
+                        <li class="text">Any empty tags you create here can be populated with notes by going to "My notes", selecting the notes you want to add, clicking or tapping the tags icon at the bottom of the screen, and selecting the tags you want to link the selected note(s) with.</li>
+                    </ul>
+                    <p></p>
+                    <form id="add-tags" action="/tags" method="post">
+                        <label class="text mb-2" for="create-tag-input">Create new tags</label>
+                        <input autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
+                        <input type="text" class="invisible" name="source" value="/mytags">
+                        <button type="submit" class="btn btn-warning mb-2">Create tag(s)</button>
+                    </form>
+                </div>
+            </div>
+            </div>
+            <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                Rename tags
+                </button>
+            </h2>
+            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
+                <div class="accordion-body">
+                    <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                </div>
+            </div>
+            </div>
+            <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                Delete tags
+                </button>
+            </h2>
+            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
+                <div class="accordion-body">
+                    <strong>This is the fourth item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

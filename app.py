@@ -316,6 +316,50 @@ def logout():
         return redirect("/login")
     
 
+# Lets the user see their tags and the notes linked with them, create empty tags, rename existing tags, and delete tags
+@app.route("/mytags")
+def mytags():
+    # Read the user's tag titles from their database
+    tags = sql(f"./databases/{session.get('username')}-notes.db",
+               """
+               SELECT tag_title
+               FROM tags
+               ORDER BY tag_title COLLATE NOCASE ASC
+               """).fetchall()
+    
+    # A dict where each key is a tag title and each value is a list containing all notes linked with that tag (dict currently empty, will be populated below)
+    tags_dict = {}
+
+    for tag in tags:
+        # Reach each tag's notes (note titles only)
+        notes_in_tag = sql(f"./databases/{session.get('username')}-notes.db",
+                        f"""
+                        SELECT note_title
+                        FROM notes
+                        WHERE note_id IN
+                        (
+                            SELECT note_id
+                            FROM tags_notes
+                            WHERE tag_id IN
+                            (
+                                SELECT tag_id
+                                FROM tags
+                                WHERE tag_title = '{tag[0]}'
+                            )
+                        )
+                        """).fetchall()
+        # If the tags_dict dictionary doesn't yet contain a key corresponding to the current tag, create one
+        # and assign an empty list as its value (to be populated with note titles later)
+        if not tags_dict.get(tag[0]):
+            tags_dict[tag[0]] = []
+        # For each note linked with the tag we are currently working on...
+        for note in notes_in_tag:
+            # ... add its title to the list (which is the value assigned to the key representing the current tag being worked on during the current iteration of the parent for loop)
+            tags_dict[tag[0]].append(note[0])
+
+    return render_template("mytags.html", tags_dict=tags_dict)
+
+
 # Display the user's saved notes and delete any empty ones in the database
 @app.route("/notes", methods=["GET", "POST"])
 @login_required
@@ -527,6 +571,8 @@ def tags():
     if selected_modal_tags: selected_modal_tags = selected_modal_tags.split(",")
     selected_notes = request.form.get("selected-notes")
     if selected_notes: selected_notes = selected_notes.split(",")
+    source = request.form.get("source") # Used to redirect the user to the page they came from after the tags function finishes
+    print(source, "SOURCEEEEEEEEEEEEEEEEEEEEEEEEEEe")##########
 
     # Initially, the tag_list is empty
     tags_list = []
@@ -555,7 +601,7 @@ def tags():
                     """, (i,))
             cur.execute("COMMIT;")
     except sqlite3.IntegrityError:
-        return apologize("/notes", "You can't have more than one tag with the same name.")
+        return apologize(source, "You can't have more than one tag with the same name.")
     
     # Extend the tags_list so it covers both newly created tags and existing tags for association with the selected notes
     if selected_modal_tags: tags_list.extend(selected_modal_tags)
@@ -599,4 +645,10 @@ def tags():
             )
             """, (int(current_note_id), tag_title_to_delete,))
 
-    return "", 204
+    # If the source of the POST request by which the user reached /tags is /mytags or /notes, redirect them back to the source
+    if source in ["/mytags", "/notes"]:
+        flash("Tag(s) modified successfully.")
+        return redirect(source)
+    # Otherwise, if the source is /, return an empty body instead (do nothing) and don't redirect
+    else:
+        return "", 204

@@ -26,20 +26,26 @@
                       {% if session["user_id"] %}
                         <ul class="navbar-nav me-auto">
                           <li class="nav-item">
+                            <a class="nav-link" href="/">
+                              <button type="button" id="nav-new-note-button" style=" --bs-btn-padding-y: 0; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .85rem;" class="btn btn-warning btn-sm"><strong>+</strong> New note</button>
+                            </a>
+                          </li>
+                          <li class="nav-item">
                             <a class="nav-link" href="/notes">My notes</a>
                           </li>
                           <li class="nav-item">
-                            <a class="nav-link" href="/logout">Log out</a>
-                          </li>
-                          <li class="nav-item">
-                            <a class="nav-link" href="/">
-                              <button type="button" style=" --bs-btn-padding-y: 0; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .85rem;" class="btn btn-warning btn-sm"><strong>+</strong> New note</button>
-                            </a>
+                            <a class="nav-link" href="/mytags">My tags</a>
                           </li>
                         </ul>
                         <ul class="navbar-nav ms-auto">
                           <li class="nav-item">
                             <a class="nav-link">Profile settings</a>
+                          </li>
+                          <li class="nav-item">
+                            <a class="nav-link">Help & FAQ</a>
+                          </li>
+                          <li class="nav-item">
+                            <a class="nav-link" href="/logout">Log out</a>
                           </li>
                         </ul>
                       {% else %}
@@ -49,6 +55,11 @@
                           </li>
                           <li class="nav-item">
                             <a class="nav-link" href="/signup">Sign up</a>
+                          </li>
+                        </ul>
+                        <ul class="navbar-nav ms-auto">
+                          <li class="nav-item">
+                            <a class="nav-link">Help & FAQ</a>
                           </li>
                         </ul>
                       {% endif %}

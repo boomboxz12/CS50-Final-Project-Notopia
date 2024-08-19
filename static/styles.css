@@ -59,6 +59,11 @@ main
     background-color: #2c2c2c;
 }
 
+.navbar-toggler:focus
+{
+    box-shadow: 0 0 0 0.125rem #d7cc40;
+}
+
 .input-label
 {
     margin-bottom: 5px;
@@ -596,6 +601,62 @@ input[type=checkbox]:checked::after
     margin-bottom: 0rem;
     border-radius: 0.5rem;
     cursor: pointer;
+}
+
+.accordion-button
+{
+    background-color: #2c2c2c;
+}
+
+.accordion-button:not(.collapsed)
+{
+    background-color: #d7cc40;
+}
+
+.accordion
+{
+    --bs-accordion-color: #f3f3f3;
+    --bs-accordion-bg: #393939;
+    --bs-accordion-border-color: #d7cc40;
+    --bs-accordion-btn-focus-box-shadow: 0 0 0 0.25rem rgba(215, 204, 64, 0.25);
+    --bs-accordion-btn-color: #f3f3f3;
+    --bs-accordion-active-color: #121212;
+    max-width: 32rem;
+    margin: auto auto;
+}
+
+.accordion-button::after
+{
+    filter: invert(1);
+}
+
+.accordion-button:not(.collapsed)::after
+{
+    filter: invert(0);
+}
+
+#nav-new-note-button
+{
+    width: 100%;
+    height: 100%;
+}
+
+.accordion-body
+{
+    text-align: left;
+}
+
+.accordion-body > form > input
+{
+    background-color: #525252;
+}
+
+#add-tags
+{
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex-direction: column;
 }
 
 @keyframes typewriter

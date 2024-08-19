@@ -110,11 +110,12 @@
                     <label class="text mb-2" for="create-tag-input">Create new tags (separated with spaces). Only alphanumeric characters allowed.</label>
                     <input autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
                     <input type="text" id="selected-notes" class="invisible" name="selected-notes" value="">
+                    <input type="text" class="invisible" name="source" value="/notes">
                     <p class="border border-secondary"></p>
                     {% if tags %}<p>Created tags:</p>{% endif %}
                     <div id="tags-list" class="tags-list pb-4">
                         {% if tags %}
-                            <p>Choose the tag(s) to which you would like to link the selected note(s):</p>
+                            <div>Choose the tag(s) to which you would like to link the selected note(s):</div>
                             {% for tag in tags %}
                                 <div class="notes-tag">
                                     <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
