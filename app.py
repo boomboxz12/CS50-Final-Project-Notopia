@@ -319,13 +319,15 @@ def logout():
 # Lets the user see their tags and the notes linked with them, create empty tags, rename existing tags, and delete tags
 @app.route("/mytags")
 def mytags():
-    # Read the user's tag titles from their database
+    # Read the user's tag titles and IDs from their database
     tags = sql(f"./databases/{session.get('username')}-notes.db",
                """
-               SELECT tag_title
+               SELECT tag_title, tag_id
                FROM tags
                ORDER BY tag_title COLLATE NOCASE ASC
                """).fetchall()
+    
+    print(tags, "TAGSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")###
     
     # A dict where each key is a tag title and each value is a list containing all notes linked with that tag (dict currently empty, will be populated below)
     tags_dict = {}
@@ -357,7 +359,7 @@ def mytags():
             # ... add its title to the list (which is the value assigned to the key representing the current tag being worked on during the current iteration of the parent for loop)
             tags_dict[tag[0]].append(note[0])
 
-    return render_template("mytags.html", tags_dict=tags_dict)
+    return render_template("mytags.html", tags_dict=tags_dict, tags=tags)
 
 
 # Display the user's saved notes and delete any empty ones in the database
@@ -564,86 +566,146 @@ def signup():
 @app.route("/tags", methods = ["POST"])
 @login_required
 def tags():
-    # Creating tags and adding notes to them
-    # Receive the tag title(s) entered/selected by the user and the selected notes
-    tag_title = request.form.get("tag-title") # Newly created tags
-    selected_modal_tags = request.form.get("selected-modal-tags") # Already created tags that are selected by checking the checkmark
-    if selected_modal_tags: selected_modal_tags = selected_modal_tags.split(",")
-    selected_notes = request.form.get("selected-notes")
-    if selected_notes: selected_notes = selected_notes.split(",")
     source = request.form.get("source") # Used to redirect the user to the page they came from after the tags function finishes
-    print(source, "SOURCEEEEEEEEEEEEEEEEEEEEEEEEEEe")##########
 
-    # Initially, the tag_list is empty
-    tags_list = []
+    # If the user is requesting that I rename one of their tags, do the following
+    if request.form.get("operation") == "rename":
+        tag_id = request.form.get("tag-id")
+        if not tag_id:
+            return apologize(source)
+        new_tag_title = request.form.get("new-tag-title")
 
-    # If the new tags are alphanumeric and are separated by spaces, find all regex matches to get a list of just the tags
-    if tag_title:
-        if tag_title.replace(" ", "").isalnum():
-            tags_list = re.findall("(\w+)[^ ]*", tag_title)
-
-    # In the case of missing or invalid new tags, inform the user with an error
-    if not tags_list and tag_title:
-        return apologize("/notes", """Please enter a valid title for the tag you want to create.
-                         You can also enter multiple titles separated by spaces to create multiple tags.
-                         Only alphanumeric characters are allowed in tag titles.""")
-    
-    # Insert newly created tag(s) into the database
-    try:
+        # Only rename the tag if a new tag title was entered
+        if new_tag_title:
+            # Check if the new tag title is alphanumeric
+            if new_tag_title.isalnum():
+                # Try updating the tag title in the database
+                try:
+                    sql(f"./databases/{session['username']}-notes.db",
+                        """
+                        UPDATE tags
+                        SET tag_title = ?
+                        WHERE tag_id = ?
+                        """, (new_tag_title, int(tag_id)))
+                except sqlite3.IntegrityError:
+                    return apologize(source, "You can't have more than one tag with the same title.")
+            
+            # If the new tag title is not alphanumeric, don't update the tag title and apologize to the user
+            else:
+                return apologize(source, "The tag title you entered is invalid. Please enter a valid tag title to rename your tag.")
+        
+        # If a new tag title wasn't entered, don't update the tag title and apologize to the user 
+        elif not new_tag_title:
+            return apologize(source, "The tag title you entered is invalid. Please enter a valid tag title to rename your tag.")
+        
+    elif request.form.get("operation") == "delete":
+        tag_id = request.form.get("tag-id")
+        if not tag_id:
+            return apologize(source)
         with sqlite3.connect(f"./databases/{session['username']}-notes.db") as con:
             cur = con.cursor()
             cur.execute("BEGIN;")
-            for i in tags_list:
-                cur.execute(
-                    """
-                    INSERT INTO tags (tag_title)
-                    VALUES (?)
-                    """, (i,))
+            cur.execute(
+                """
+                DELETE FROM tags
+                WHERE tag_id = ?
+                """, (tag_id,))
+            cur.execute(
+                """
+                DELETE FROM tags_notes
+                WHERE tag_id = ?
+                """, (tag_id,))
             cur.execute("COMMIT;")
-    except sqlite3.IntegrityError:
-        return apologize(source, "You can't have more than one tag with the same name.")
-    
-    # Extend the tags_list so it covers both newly created tags and existing tags for association with the selected notes
-    if selected_modal_tags: tags_list.extend(selected_modal_tags)
 
-    # Associate the notes with their tags (new and existing) by inserting into tags_notes
-    try:
-        with sqlite3.connect(f"./databases/{session['username']}-notes.db") as con:
-            cur = con.cursor()
-            if selected_notes:
-                for i in selected_notes:
-                    for j in tags_list:
-                        cur.execute(
-                            f"""
-                            INSERT INTO tags_notes (tag_id, note_id)
-                            VALUES ((
-                                    SELECT tag_id
-                                    FROM tags
-                                    WHERE tag_title = '{j}'
-                                    ),
-                                    {i})
-                            """)
-    # IntegrityError = The user attempts to add a tag to a note when that tag is already added to the note (associating the note with a tag it's already associated with)
-    except sqlite3.IntegrityError:
-        return apologize("/notes", "This note has already been added to that tag.")
-    
 
-    # Removing a note from a tag when the tag is clicked when the note is open in the editor
-    if request.is_json:
-        results = request.get_json()
-        tag_title_to_delete = results.get("tagTitle")
-        current_note_id = results.get("noteId")
 
-        sql(f"./databases/{session['username']}-notes.db", 
-            """
-            DELETE FROM tags_notes
-            WHERE note_id = ?
-            AND tag_id = (
-                SELECT tag_id
-                FROM tags
-                WHERE tag_title = ?
-            )
-            """, (int(current_note_id), tag_title_to_delete,))
+    # Otherwise, if the requested operation is something else, do the following
+    else:
+        # Creating tags and adding notes to them
+        # Receive the tag title(s) entered/selected by the user and the selected notes
+        tag_title = request.form.get("tag-title") # Newly created tag(s)
+        selected_modal_tags = request.form.get("selected-modal-tags") # Already created tags that are selected by checking the checkmark
+        if selected_modal_tags: selected_modal_tags = selected_modal_tags.split(",")
+        selected_notes = request.form.get("selected-notes")
+        if selected_notes: selected_notes = selected_notes.split(",")
+        
+
+        # Initially, the tag_list is empty
+        tags_list = []
+
+        # If the new tags are alphanumeric and are separated by spaces, find all regex matches to get a list of just the tags
+        try:
+            if tag_title and len(tag_title) < 21:
+                if tag_title.replace(" ", "").isalnum():
+                    tags_list = re.findall("(\w+)[^ ]*", tag_title)
+            elif len(tag_title) > 20:
+                return apologize(source, "Tag titles can't be longer than 20 characters.")
+            
+        except TypeError: # Prevents "TypeError: object of type 'NoneType' has no len()"
+            pass
+
+        # In the case of missing or invalid new tags, inform the user with an error
+        if not tags_list and tag_title:
+            return apologize(source, """Please enter a valid title for the tag you want to create.
+                            You can also enter multiple titles separated by spaces to create multiple tags.
+                            Only alphanumeric characters are allowed in tag titles. Tag titles can't be longer than 20 characters.""")
+        
+        # Insert newly created tag(s) into the database
+        try:
+            with sqlite3.connect(f"./databases/{session['username']}-notes.db") as con:
+                cur = con.cursor()
+                cur.execute("BEGIN;")
+                for i in tags_list:
+                    cur.execute(
+                        """
+                        INSERT INTO tags (tag_title)
+                        VALUES (?)
+                        """, (i,))
+                cur.execute("COMMIT;")
+        except sqlite3.IntegrityError:
+            return apologize(source, "You can't have more than one tag with the same title.")
+        
+        # Extend the tags_list so it covers both newly created tags and existing tags for association with the selected notes
+        if selected_modal_tags: tags_list.extend(selected_modal_tags)
+
+        # Associate the notes with their tags (new and existing) by inserting into tags_notes
+        try:
+            with sqlite3.connect(f"./databases/{session['username']}-notes.db") as con:
+                cur = con.cursor()
+                if selected_notes:
+                    for i in selected_notes:
+                        for j in tags_list:
+                            cur.execute(
+                                f"""
+                                INSERT INTO tags_notes (tag_id, note_id)
+                                VALUES ((
+                                        SELECT tag_id
+                                        FROM tags
+                                        WHERE tag_title = '{j}'
+                                        ),
+                                        {i})
+                                """)
+        # IntegrityError = The user attempts to add a tag to a note when that tag is already added to the note (associating the note with a tag it's already associated with)
+        except sqlite3.IntegrityError:
+            return apologize(source, "This note has already been added to that tag.")
+        
+
+        # Removing a note from a tag when the tag is clicked when the note is open in the editor
+        if request.is_json:
+            results = request.get_json()
+            tag_title_to_delete = results.get("tagTitle")
+            current_note_id = results.get("noteId")
+
+            sql(f"./databases/{session['username']}-notes.db", 
+                """
+                DELETE FROM tags_notes
+                WHERE note_id = ?
+                AND tag_id = (
+                    SELECT tag_id
+                    FROM tags
+                    WHERE tag_title = ?
+                )
+                """, (int(current_note_id), tag_title_to_delete,))
 
     # If the source of the POST request by which the user reached /tags is /mytags or /notes, redirect them back to the source
     if source in ["/mytags", "/notes"]:

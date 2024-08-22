@@ -107,8 +107,8 @@
             </div>
             <div id="modal-body2" class="modal-body">
                 <form id="add-tags" action="/tags" method="post">
-                    <label class="text mb-2" for="create-tag-input">Create new tags (separated with spaces). Only alphanumeric characters allowed.</label>
-                    <input autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
+                    <label class="text mb-2" for="create-tag-input">Create new tags (separated with spaces). Only alphanumeric characters allowed. Tag titles can't be longer than 20 characters.</label>
+                    <input class="tag-input" autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
                     <input type="text" id="selected-notes" class="invisible" name="selected-notes" value="">
                     <input type="text" class="invisible" name="source" value="/notes">
                     <p class="border border-secondary"></p>
@@ -137,6 +137,7 @@
         </div>
     </div>
 {% endblock %}
+
 {% block script %}
 <script type="module" src="../static/notes.js"></script>
 {% endblock %}

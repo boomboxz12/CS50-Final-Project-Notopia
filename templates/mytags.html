@@ -20,7 +20,7 @@
                         <p></p>
                         <ul>
                             {% for key in tags_dict.keys() %}
-                                <li><strong>{{ key[:20] }}{% if key|length > 20 %}...{% endif %}{% if tags_dict[key] %}:{% endif %}</strong></li>
+                                <li><strong>{{ key }}{% if tags_dict[key] %}:{% endif %}</strong></li>
                                     <ul>
                                         {% for note in tags_dict[key] %}
                                             <li class="text">{{ note }}</li>
@@ -42,19 +42,20 @@
             </h2>
             <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
                 <div class="accordion-body">
+                    <strong>Instructions:</strong>
                     <ul class="mb-0">
-                        <strong>Instructions:</strong>
                         <li class="text">Tags can be used to categorize notes that have things in common between them for better organization.</li>
                         <li class="text">You can create a new (empty) tag or tags by entering the names of the tags you want to create (separated by spaces) in the field below.</li>
                         <li class="text">Only alphanumeric characters are allowed in tag names.</li>
-                        <li class="text">Any empty tags you create here can be populated with notes by going to "My notes", selecting the notes you want to add, clicking or tapping the tags icon at the bottom of the screen, and selecting the tags you want to link the selected note(s) with.</li>
+                        <li class="text">Tag titles can't be longer than 20 characters.</li>
+                        <li class="text">Tag titles must be unique, meaning you can't have more than one tag with the same title.</li>
+                        <li class="text">Any empty tags you create here can be populated with notes by going to "My notes", selecting the notes you want to add, clicking or tapping the tags icon at the bottom of the screen, selecting the tags you want to link the selected note(s) with, and clicking or tapping "Add".</li>
                     </ul>
-                    <p></p>
-                    <form id="add-tags" action="/tags" method="post">
+                    <form class="mt-2" id="add-tags" action="/tags" method="post">
                         <label class="text mb-2" for="create-tag-input">Create new tags</label>
-                        <input autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
+                        <input class="tag-input" autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
                         <input type="text" class="invisible" name="source" value="/mytags">
-                        <button type="submit" class="btn btn-warning mb-2">Create tag(s)</button>
+                        <button type="submit" class="btn btn-warning mb-2 tag-input">Create tag(s)</button>
                     </form>
                 </div>
             </div>
@@ -67,7 +68,23 @@
             </h2>
             <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
                 <div class="accordion-body">
-                    <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                    <strong>Instructions:</strong>
+                    <ul class="mb-0">
+                        <li class="text">Only alphanumeric characters are allowed in tag names.</li>
+                        <li class="text">Tag titles can't be longer than 20 characters.</li>
+                        <li class="text">Tag titles must be unique, meaning you can't have more than one tag with the same title.</li>
+                        <li class="text">Tags are listed alphabetically, so renaming a tag may move it to a new position. Don't panic if you rename a tag and see it disappear from its previous position. It hasn't been deleted!</li>
+                    </ul>
+                    {% for tag in tags %}
+                        <form class="mt-4 tag-form" action="/tags" method="post">
+                            <label class="text mb-3 center" for="{{ tag[0] }}">Rename "{{ tag[0] }}"</label>
+                            <input class="tag-input" autocomplete="off" type="text" id="{{ tag[0] }}" name="new-tag-title" value="{{ tag[0] }}" placeholder="{{ tag[0] }}">
+                            <input type="text" class="invisible" name="tag-id" value="{{ tag[1] }}">
+                            <input type="text" class="invisible" name="operation" value="rename">
+                            <input type="text" class="invisible" name="source" value="/mytags">
+                            <button type="submit" class="btn btn-warning mb-2 tag-input">Rename "{{ tag[0][:10] }}{% if tag[0]|length > 10 %}...{% endif %}"</button>
+                        </form>
+                    {% endfor %}
                 </div>
             </div>
             </div>
@@ -79,10 +96,33 @@
             </h2>
             <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
                 <div class="accordion-body">
-                    <strong>This is the fourth item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+                    <strong>Instructions:</strong>
+                    <ul class="mb-0">
+                        <li class="text">To protect you from accidental deletions, you must confirm your intention to delete a tag by checking its checkbox before deleting it.</li>
+                        <li class="text">Tag deletions can't be undone, so make sure you really intend to delete a tag before actually doing it.</li>
+                        <li class="text">Deleting a tag won't delete the notes linked to it. They will remain safe and sound.</li>
+                        <li class="text">When you delete a tag, any notes that were previously linked to it will be unlinked from it. This won't affect any links between your notes and the tags you don't delete.</li>
+                    </ul>
+                    {% for tag in tags %}
+                        <form class="mt-4 tag-form" action="/tags" method="post">
+                            <p class="text center">Delete "{{ tag[0] }}"</p>
+                            <div class="d-flex mb-4 tag-to-delete">
+                                <label for="{{ tag[1] }}">I'm sure I want to delete this tag</label>
+                                <input class="delete-tag-checkbox" id="{{ tag[1] }}" type="checkbox">
+                            </div>
+                            <input type="text" class="invisible" name="tag-id" value="{{ tag[1] }}">
+                            <input type="text" class="invisible" name="operation" value="delete">
+                            <input type="text" class="invisible" name="source" value="/mytags">
+                            <button type="submit" class="btn btn-warning mb-2 tag-input delete-tag-button" disabled tabindex="-1" aria-disabled="true">Delete "{{ tag[0][:10] }}{% if tag[0]|length > 10 %}...{% endif %}"</button>
+                        </form>
+                    {% endfor %}
                 </div>
             </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block script %}
+<script src="../static/mytags.js"></script>
 {% endblock %}

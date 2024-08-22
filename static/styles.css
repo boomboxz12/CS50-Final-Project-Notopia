@@ -540,9 +540,9 @@ input[type=checkbox]:checked::after
     z-index: 2;
 }
 
-#create-tag-input
+.tag-input
 {
-    width: 100%;
+    width: 100% !important;
 }
 
 .tags-list
@@ -657,6 +657,25 @@ input[type=checkbox]:checked::after
     justify-content: center;
     flex-wrap: wrap;
     flex-direction: column;
+}
+
+.tag-to-delete
+{
+    flex-direction: row-reverse;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tag-form
+{
+    border: 0.0625rem solid #777777;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+
+.center
+{
+    text-align: center;
 }
 
 @keyframes typewriter
