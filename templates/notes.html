@@ -19,10 +19,11 @@
     </div>
     <div class="notes-page-top">
         <h2 class="text mb-5">My notes</h2>
-        {% if notes %}
+        {% if notes or filter_information or search_query %}
             <div class="tools notes-tools">
                 <svg id="show-sort-button" class="tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M183.6 469.6C177.5 476.2 169 480 160 480s-17.5-3.8-23.6-10.4l-88-96c-11.9-13-11.1-33.3 2-45.2s33.3-11.1 45.2 2L128 365.7 128 64c0-17.7 14.3-32 32-32s32 14.3 32 32l0 301.7 32.4-35.4c11.9-13 32.2-13.9 45.2-2s13.9 32.2 2 45.2l-88 96zM320 320c0-17.7 14.3-32 32-32l128 0c12.9 0 24.6 7.8 29.6 19.8s2.2 25.7-6.9 34.9L429.3 416l50.7 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-128 0c-12.9 0-24.6-7.8-29.6-19.8s-2.2-25.7 6.9-34.9L402.7 352 352 352c-17.7 0-32-14.3-32-32zM416 32c12.1 0 23.2 6.8 28.6 17.7l64 128 16 32c7.9 15.8 1.5 35-14.3 42.9s-35 1.5-42.9-14.3L460.2 224l-88.4 0-7.2 14.3c-7.9 15.8-27.1 22.2-42.9 14.3s-22.2-27.1-14.3-42.9l16-32 64-128C392.8 38.8 403.9 32 416 32zM395.8 176l40.4 0L416 135.6 395.8 176z"/></svg>
                 <svg id="show-filter-button" class="tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M345 39.1L472.8 168.4c52.4 53 52.4 138.2 0 191.2L360.8 472.9c-9.3 9.4-24.5 9.5-33.9 .2s-9.5-24.5-.2-33.9L438.6 325.9c33.9-34.3 33.9-89.4 0-123.7L310.9 72.9c-9.3-9.4-9.2-24.6 .2-33.9s24.6-9.2 33.9 .2zM0 229.5L0 80C0 53.5 21.5 32 48 32l149.5 0c17 0 33.3 6.7 45.3 18.7l168 168c25 25 25 65.5 0 90.5L277.3 442.7c-25 25-65.5 25-90.5 0l-168-168C6.7 262.7 0 246.5 0 229.5zM144 144a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
+                <svg id="show-search-button" class="tool" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#f3f3f3" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>
             </div>
             <div id="sort-notes-container">
                 <p><strong>Sort notes by:</strong></p>
@@ -57,10 +58,20 @@
                     <button type="submit" id="filter_button" class="btn btn-warning mb-4">Filter</button>
                 </form>
             </div>
+            <div id="search-notes-container">
+                <p><strong>Search notes:</strong></p>
+                <form action="/notes" method="post">
+                    <input type="text" name="search-query">
+                    <input class="invisible" type="text" name="operation" value="search">
+                    <button type="submit" class="btn btn-warning mb-1">Search</button>
+                </form>
+            </div>
         {% endif %}
     </div>
     {% if filter_information %}
-        <p>{{ filter_information }}</p>
+        <p class="text">{{ filter_information }}</p>
+    {% elif search_query %}
+        <p class="text">Showing search results for "{{search_query}}".</p>
     {% endif %}
     <div class="notes-flex">
         {% for note in notes %}
@@ -76,8 +87,14 @@
                 <p class="invisible date_modified">{{ note[5] }}</p>
             </a>
         {% endfor %}
-        {% if not notes %}
-            <h1 clas="text">No notes.</h1>
+        {% if not notes and not filter_information and not search_query %}
+            <div id="no-notes">
+                <h1 clas="text">There don't seem to be any notes here.</h1>
+                <a href="/"><button class="btn btn-warning">Create a note</button></a>
+            </div>
+        {% endif %}
+        {% if not notes and (filter_information or search_query) %}
+            <h1 clas="text">There don't seem to be any notes here.</h1>
         {% endif %}
     </div>
     <p></p>

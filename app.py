@@ -318,6 +318,7 @@ def logout():
 
 # Lets the user see their tags and the notes linked with them, create empty tags, rename existing tags, and delete tags
 @app.route("/mytags")
+@login_required
 def mytags():
     # Read the user's tag titles and IDs from their database
     tags = sql(f"./databases/{session.get('username')}-notes.db",
@@ -366,46 +367,66 @@ def mytags():
 @app.route("/notes", methods=["GET", "POST"])
 @login_required
 def notes():
-    # Has the user requested that I sort their notes?
-    sort = request.args.get("sort_notes_by")
-
-    # Has the user requested that I filter their notes by a tag or tags?
-    filter = request.form
+    # Some variables to prevent "UnboundLocalError: local variable referenced before assignment" errors later
     filter_string = ""
     filter_information = ""
-    if filter:
-        # The number of question marks (parameters) to be passed to the SQL query is equal to the number of keys received
-        qmarks = "?, " * len(filter.keys())
-        qmarks = qmarks[:-2]
-        # A string to be added to the the SQL query under the function get_notes below
-        filter_string = f"""
-        WHERE note_id IN (
-            SELECT note_id
-            FROM tags_notes
-            WHERE tag_id IN (
-                SELECT tag_id
-                FROM tags
-                WHERE tag_title IN ({qmarks})
+    sort_dict = {"0": "date_created DESC"}
+    sort = "0"
+    filter = None
+    search_tuple = ""
+    search_string = ""
+    search_query = None
+
+    # Has the user requested that I search through their notes?
+    operation = request.form.get("operation")
+    if operation == "search":
+        # Receive the search query
+        search_query = request.form.get("search-query")
+        search_string = """
+                            WHERE note_title LIKE ?
+                            OR note_body LIKE ?
+                        """
+        search_tuple = ("%"+search_query+"%", "%"+search_query+"%")
+    
+    else:
+        # Has the user requested that I sort their notes?
+        sort = request.args.get("sort_notes_by")
+
+        # Has the user requested that I filter their notes by a tag or tags?
+        filter = request.form
+        if filter:
+            # The number of question marks (parameters) to be passed to the SQL query is equal to the number of keys received
+            qmarks = "?, " * len(filter.keys())
+            qmarks = qmarks[:-2]
+            # A string to be added to the the SQL query under the function get_notes below
+            filter_string = f"""
+            WHERE note_id IN (
+                SELECT note_id
+                FROM tags_notes
+                WHERE tag_id IN (
+                    SELECT tag_id
+                    FROM tags
+                    WHERE tag_title IN ({qmarks})
+                )
             )
-        )
-        """
-        filtered_by = ""
-        for i in filter.keys():
-            filtered_by += i + ", "
-        filtered_by = filtered_by[:-2] + "."
-        filter_information = f"Your notes are filtered by the following tags: {filtered_by}"
+            """
+            filtered_by = ""
+            for i in filter.keys():
+                filtered_by += i + ", "
+            filtered_by = filtered_by[:-2] + "."
+            filter_information = f"Your notes are filtered by the following tags: {filtered_by} Only notes linked with the aforementioned tag(s) are displayed."
         
 
-    # Dictionary used to modify the SQL query when sorting notes
-    sort_dict = {
-        "title-asc": "note_title COLLATE NOCASE ASC",
-        "title-desc": "note_title COLLATE NOCASE DESC",
-        "creation-asc": "date_created ASC",
-        "creation-desc": "date_created DESC",
-        "modification-asc": "date_modified ASC",
-        "modification-desc": "date_modified DESC",
-        None: "date_created DESC"
-    }
+        # Dictionary used to modify the SQL query when sorting notes
+        sort_dict = {
+            "title-asc": "note_title COLLATE NOCASE ASC",
+            "title-desc": "note_title COLLATE NOCASE DESC",
+            "creation-asc": "date_created ASC",
+            "creation-desc": "date_created DESC",
+            "modification-asc": "date_modified ASC",
+            "modification-desc": "date_modified DESC",
+            None: "date_created DESC"
+        }
 
     # Is the user requesting note multi deletion? If so, which notes should I try to delete?
     try:
@@ -433,14 +454,24 @@ def notes():
         pass
     
     # Read the notes from the user's notes database
+    # if filter:
     def get_notes():
         notes = sql(f"./databases/{session.get('username')}-notes.db", f"""
                 SELECT note_id, note_title, note_body, bg_color, date_created, date_modified
                 FROM notes
                 {filter_string}
+                {search_string}
                 ORDER BY {sort_dict[sort]}
-                """, tuple(filter.keys())).fetchall()
+                """, tuple(filter.keys()) if filter else search_tuple).fetchall()
         return notes
+    # else:
+    #     def get_notes():
+    #         notes = sql(f"./databases/{session.get('username')}-notes.db", f"""
+    #                 SELECT note_id, note_title, note_body, bg_color, date_created, date_modified
+    #                 FROM notes
+    #                 ORDER BY {sort_dict[sort]}
+    #                 """).fetchall()
+    #         return notes
     
     # Delete any existing empty notes
     for note in get_notes():
@@ -457,7 +488,7 @@ def notes():
                ORDER BY tag_title COLLATE NOCASE ASC
                """).fetchall()
                 
-    return render_template("notes.html", notes=get_notes(), tags=tags, filter_information=filter_information) # Calling get_notes again to reread the notes after deleting any empty notes
+    return render_template("notes.html", notes=get_notes(), tags=tags, filter_information=filter_information, search_query=search_query) # Calling get_notes again to reread the notes after deleting any empty notes
     
     
 @app.route("/signup", methods=["GET", "POST"])

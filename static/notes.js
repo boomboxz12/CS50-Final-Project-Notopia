@@ -8,8 +8,10 @@ const confirmDelete = document.getElementById("modal-confirm-delete-button");
 const confirmLeave = document.querySelectorAll(".confirm-leave");
 const sortNotesContainer = document.getElementById("sort-notes-container");
 const filterNotesContainer = document.getElementById("filter-notes-container");
+const searchNotesContainer = document.getElementById("search-notes-container");
 const showSortButton = document.getElementById("show-sort-button");
 const showFilterButton = document.getElementById("show-filter-button");
+const showSearchButton = document.getElementById("show-search-button");
 const selectedNotesInput = document.getElementById("selected-notes");
 const modalTags = document.querySelectorAll(".notes-tag");
 const selectedModalTagsInput = document.getElementById("selected-modal-tags");
@@ -105,22 +107,38 @@ window.onbeforeunload = function() {
     }
 }
 
-// Show/hide the note sorting/filtering options when clicking the respective button
+// Show/hide the note sorting/filtering/searching options when clicking the respective button
 let displayModes = ["none", "inline"];
 let numberOfSortClicks = 0;
 let numberOfFilterClicks = 0;
-showSortButton.addEventListener("click", () => {
-    numberOfSortClicks++;
-    numberOfFilterClicks = 0;
-    filterNotesContainer.style.display = "none";
-    sortNotesContainer.style.display = displayModes[numberOfSortClicks % 2];
-});
-showFilterButton.addEventListener("click", () => {
-    numberOfSortClicks = 0;
-    numberOfFilterClicks++;
-    filterNotesContainer.style.display = displayModes[numberOfFilterClicks % 2];
-    sortNotesContainer.style.display = "none";
-});
+let numberOfSearchClicks = 0;
+
+if (showSortButton) { // Prevents "Uncaught TypeError: showSortButton is null" in case the user visits /notes with no notes in their database
+    showSortButton.addEventListener("click", () => {
+        numberOfSortClicks++;
+        numberOfFilterClicks = 0;
+        numberOfSearchClicks = 0;
+        sortNotesContainer.style.display = displayModes[numberOfSortClicks % 2];
+        filterNotesContainer.style.display = "none";
+        searchNotesContainer.style.display = "none";
+    });
+    showFilterButton.addEventListener("click", () => {
+        numberOfSortClicks = 0;
+        numberOfFilterClicks++;
+        numberOfSearchClicks = 0;
+        sortNotesContainer.style.display = "none";
+        filterNotesContainer.style.display = displayModes[numberOfFilterClicks % 2];
+        searchNotesContainer.style.display = "none";
+    });
+    showSearchButton.addEventListener("click", () => {
+        numberOfSortClicks = 0;
+        numberOfFilterClicks = 0;
+        numberOfSearchClicks++;
+        sortNotesContainer.style.display = "none";
+        filterNotesContainer.style.display = "none";
+        searchNotesContainer.style.display = displayModes[numberOfSearchClicks % 2];
+    });
+}
 
 // Array for keeping track of the tags selected in the "add selected note(s) to tag(s)" modal dialog
 let selectedModalTags = [];

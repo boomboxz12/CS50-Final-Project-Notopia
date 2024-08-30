@@ -569,7 +569,7 @@ input[type=checkbox]:checked::after
     left: 2rem;
 }
 
-#sort-notes-container, #filter-notes-container
+#sort-notes-container, #filter-notes-container, #search-notes-container
 {
     display: none;
 }
@@ -676,6 +676,13 @@ input[type=checkbox]:checked::after
 .center
 {
     text-align: center;
+}
+
+#no-notes
+{
+    display: flex;
+    flex-direction: column;
+    gap: 10vh;
 }
 
 @keyframes typewriter
