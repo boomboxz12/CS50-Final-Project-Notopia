@@ -79,9 +79,9 @@
                 <div class="note-bg"></div>
                 <input type="checkbox">
                 <p class="invisible note_id">{{ note[0] }}</p>
-                <p class="note-text text note-title">{{ note[1] }}</p>
+                <p dir="auto" class="note-text text note-title">{{ note[1] }}</p>
                 <p class="note-text border border-secondary"></p>
-                <p class="note-text small-text note-body">{{ note[2] }}</p>
+                <p dir="auto" class="note-text small-text note-body">{{ note[2] }}</p>
                 <p class="invisible bg_color">{{ note[3] }}</p>
                 <p class="invisible date_created">{{ note[4] }}</p>
                 <p class="invisible date_modified">{{ note[5] }}</p>
@@ -97,12 +97,12 @@
             <h1 clas="text">There don't seem to be any notes here.</h1>
         {% endif %}
     </div>
-    <p></p>
+    <br>
     <div class="modal" id="deleteConfirmation" tabindex="-1" aria-labelledby="deleteConfirmation" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-            <h1 class="modal-title fs-5" id="deleteConfirmation">Confirm deletion</h1>
+            <h1 class="modal-title fs-5">Confirm deletion</h1>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div id="modal-body" class="modal-body">
@@ -135,7 +135,7 @@
                             <div>Choose the tag(s) to which you would like to link the selected note(s):</div>
                             {% for tag in tags %}
                                 <div class="notes-tag">
-                                    <input type="checkbox" name="{{ tag[0] }}" id="{{ tag[0] }}">
+                                    <input type="checkbox" name="{{ tag[0] }}">
                                     <label for="{{ tag[0] }}">{{ tag[0][:20] }}{% if tag[0]|length > 20 %}...{% endif %}</label>
                                 </div>
                             {% endfor %}

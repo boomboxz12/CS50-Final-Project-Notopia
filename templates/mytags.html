@@ -14,10 +14,9 @@
                 </button>
             </h2>
             <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
-                <div class="accordion-body">
+                <div id="view-tags-accordion" class="accordion-body">
                     {% if tags_dict %}
                         <strong>Here are your created tags and the notes linked with them. Tip: If you have too many tags and/or notes, you can use your browser's "Find in page" feature to look for exactly what you want.</strong>
-                        <p></p>
                         <ul>
                             {% for key in tags_dict.keys() %}
                                 <li><strong>{{ key }}{% if tags_dict[key] %}:{% endif %}</strong></li>
@@ -55,7 +54,7 @@
                         <label class="text mb-2" for="create-tag-input">Create new tags</label>
                         <input class="tag-input" autocomplete="off" type="text" id="create-tag-input" name="tag-title" placeholder="Tag1 Tag2 Tag3">
                         <input type="text" class="invisible" name="source" value="/mytags">
-                        <button type="submit" class="btn btn-warning mb-2 tag-input">Create tag(s)</button>
+                        <button id="create-tag-button" disabled="disabled" tabindex="-1" aria-disabled="true" type="submit" class="btn btn-warning mb-2 tag-input">Create tag(s)</button>
                     </form>
                 </div>
             </div>

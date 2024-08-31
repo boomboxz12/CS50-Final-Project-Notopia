@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ session['username']}}'s account settings 
+{% endblock %}
+
+{% block main %}
+    <div class="accordion-container">
+        <h2 class="text mb-5">{{ session['username'] }}'s account settings</h2>
+        <div class="accordion" id="tagsAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                    Change password
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
+                    <div class="accordion-body">
+                        <form action="/account" method="post">
+                            <label for="username" class="text mb-2">Old password</label>
+                            <input class="mb-4" id="username" required autocomplete="off" type="password" placeholder="Old password" name="old-password">
+                            <p id="username_warning" class="small-text invisible"> </p>
+                            <label for="password" class="text mb-2">New password</label>
+                            <input class="mb-2" id="password" required autocomplete="off" type="password" placeholder="New password" name="password">
+                            <p id="password_rules" class="small-text"> </p>
+                            <label for="confirmation" class="text mb-2">Confirm new password</label>
+                            <input class="mb-2" id="confirmation" required autocomplete="off" type="password" placeholder="Confirm new password" name="confirmation">
+                            <p id="confirmation_warning" class="small-text"> </p>
+                            <input id="submit" class="btn btn-warning signup-login-button mb-1" disabled="disabled" tabindex="-1" aria-disabled="true" type="submit" value="Change password">
+                            <input class="invisible" name="operation" value="change-password">
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Download database file
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#tagsAccordion">
+                    <div class="accordion-body db-download-container">
+                        <strong>You can download your SQLite3 database file where your notes and tags are stored as a backup. Database files can't be reuploaded back to Notopia for security reasons. You must enter your password to download the database file.</strong>
+                        <form action="/account" method="post">
+                            <label class="mb-1" for="db-password">Enter your password</label>
+                            <input id="db-password" class="mb-2" required autocomplete="off" type="password" placeholder="Password" name="password">
+                            <input class="invisible" name="operation" value="db-download">
+                            <input disabled aria-disabled="true" tabindex="-1" id="get-db" type="submit" class="btn btn-warning" value="Download database file">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="../static/signup.js"></script>
+    <script src="../static/account.js"></script>
+{% endblock %}

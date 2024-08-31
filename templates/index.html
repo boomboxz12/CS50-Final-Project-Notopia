@@ -9,11 +9,11 @@
     <p id="note_id" class="invisible">{% if editing_mode %}{{ note[0][0] }}{% endif %}</p>
     <p id="bg_color" class="invisible">{% if editing_mode %}{{ note[0][3] }}{% endif %}</p>
     <div class="note-editor">
-        <label class="input-label text" for="title">Title</label>
-        <input autofocus type="text" class="note_data" autocomplete="off" id="title" name="note_title" placeholder="Untitled note" value={% if editing_mode %}"{{ note[0][1] }}"{% endif %}>
-        <label id="note_body_label" class="input-label text" for="note">Note</label>
-        <textarea class="note_data" autocomplete="off" name="note_body" id="note" placeholder="Note">{% if editing_mode %}{{ note[0][2] }}{% endif %}</textarea>
-        <div id="view_area" class="view_area note_data"></div>
+        <label class="input-label text" for="title">Note title</label>
+        <input dir="auto" autofocus type="text" class="note_data" autocomplete="off" id="title" name="note_title" placeholder="Untitled note" value={% if editing_mode %}"{{ note[0][1] }}"{% endif %}>
+        <label id="note_body_label" class="input-label text" for="note">Note body</label>
+        <textarea dir="auto" class="note_data" autocomplete="off" name="note_body" id="note" placeholder="Note">{% if editing_mode %}{{ note[0][2] }}{% endif %}</textarea>
+        <div dir="auto" id="view_area" class="view_area note_data"></div>
         {% if not logged_in %}
             <p id="saving_disabled_message">You are currently not logged in, so saving has been disabled. To save your notes, please <a href="/login">log in</a> first.</p>
         {% else %}
@@ -60,11 +60,13 @@
                 </div>
                 </div>
             </div>
-            <p></p>
         {% endif %}
     </div>
+    {% if editing_mode %}
+        <p class="date mb-0">Created: {{ note[0][4] }}. Last modified: {{ note[0][5] }}</p>
+    {% endif %}
     {% if editing_mode and note[0][6] %}
-        <div class="editor-tags-container mt-2" id="editor-tags-container">
+        <div class="editor-tags-container mb-0" id="editor-tags-container">
             Tags (click one to unlink the note):
         {% for tag in note[0][6] %}
             <p class="small-text editor-tags">{{ tag }}</p>

@@ -1,162 +1,162 @@
 import bgColors from "./bgColors.js";
 
-// Get the DOMs
-const notes = document.querySelectorAll(".note-flex-item");
-const selectedNotesCounter = document.getElementById("selected-notes-counter");
-const modalBody = document.getElementById("modal-body");
-const confirmDelete = document.getElementById("modal-confirm-delete-button");
-const confirmLeave = document.querySelectorAll(".confirm-leave");
-const sortNotesContainer = document.getElementById("sort-notes-container");
-const filterNotesContainer = document.getElementById("filter-notes-container");
-const searchNotesContainer = document.getElementById("search-notes-container");
-const showSortButton = document.getElementById("show-sort-button");
-const showFilterButton = document.getElementById("show-filter-button");
-const showSearchButton = document.getElementById("show-search-button");
-const selectedNotesInput = document.getElementById("selected-notes");
-const modalTags = document.querySelectorAll(".notes-tag");
-const selectedModalTagsInput = document.getElementById("selected-modal-tags");
+document.addEventListener("DOMContentLoaded", () => {
+    // Get the DOMs
+    const notes = document.querySelectorAll(".note-flex-item");
+    const selectedNotesCounter = document.getElementById("selected-notes-counter");
+    const modalBody = document.getElementById("modal-body");
+    const confirmDelete = document.getElementById("modal-confirm-delete-button");
+    const confirmLeave = document.querySelectorAll(".confirm-leave");
+    const sortNotesContainer = document.getElementById("sort-notes-container");
+    const filterNotesContainer = document.getElementById("filter-notes-container");
+    const searchNotesContainer = document.getElementById("search-notes-container");
+    const showSortButton = document.getElementById("show-sort-button");
+    const showFilterButton = document.getElementById("show-filter-button");
+    const showSearchButton = document.getElementById("show-search-button");
+    const selectedNotesInput = document.getElementById("selected-notes");
+    const modalTags = document.querySelectorAll(".notes-tag");
+    const selectedModalTagsInput = document.getElementById("selected-modal-tags");
 
-// Change the colors of the notes in te notes grid according to the database's "bg_color" column
-notes.forEach((colorChange))
-function colorChange(note) {
-    const bgColor = note.querySelector(".bg_color").innerHTML;
-    if (bgColor == "dark") {
-        note.style.backgroundColor = bgColors[bgColor][2];
-        note.addEventListener("mouseenter", () => {
-            note.style.backgroundColor = bgColors[bgColor][3];
-        });
-        note.addEventListener("mouseleave", () => {
+    // Change the colors of the notes in te notes grid according to the database's "bg_color" column
+    notes.forEach((colorChange))
+    function colorChange(note) {
+        const bgColor = note.querySelector(".bg_color").innerHTML;
+        if (bgColor == "dark") {
             note.style.backgroundColor = bgColors[bgColor][2];
-        });
-    }
+            note.addEventListener("mouseenter", () => {
+                note.style.backgroundColor = bgColors[bgColor][3];
+            });
+            note.addEventListener("mouseleave", () => {
+                note.style.backgroundColor = bgColors[bgColor][2];
+            });
+        }
 
-    else {
-        note.style.backgroundColor = bgColors[bgColor][0];
-        note.addEventListener("mouseenter", () => {
-            note.style.backgroundColor = bgColors[bgColor][1];
-        });
-        note.addEventListener("mouseleave", () => {
+        else {
             note.style.backgroundColor = bgColors[bgColor][0];
-        });
+            note.addEventListener("mouseenter", () => {
+                note.style.backgroundColor = bgColors[bgColor][1];
+            });
+            note.addEventListener("mouseleave", () => {
+                note.style.backgroundColor = bgColors[bgColor][0];
+            });
+        }
     }
-}
 
-// Array for keeping track of selected notes
-const selectedNotes = [];
+    // Array for keeping track of selected notes
+    const selectedNotes = [];
 
-// Add selected notes to the array and remove deselected ones
-notes.forEach(noteSelector);
-function noteSelector(note) {
-    // Selecting DOMs
-    const note_id = note.querySelector("p").innerHTML;
-    const note_checkbox = note.querySelector("input[type=checkbox]");
-    const selectedNotesCounterText = selectedNotesCounter.querySelector(".d-flex").querySelector(".toast-body")
+    // Add selected notes to the array and remove deselected ones
+    notes.forEach(noteSelector);
+    function noteSelector(note) {
+        // Selecting DOMs
+        const note_id = note.querySelector("p").innerHTML;
+        const note_checkbox = note.querySelector("input[type=checkbox]");
+        const selectedNotesCounterText = selectedNotesCounter.querySelector(".d-flex").querySelector(".toast-body")
 
-    note.addEventListener("input", () => {
-        // Add notes with a checked checkbox to the selectedNotes array
-        if (note_checkbox.checked) {
-            selectedNotes.push(note_id);
-        }
-        // Remove notes with an unchecked checkbox (that were previously checked) from the selectedNotes array
-        else if (!note_checkbox.checked) {
-            selectedNotes.splice(selectedNotes.indexOf(note_id), 1);
-        }
+        note.addEventListener("input", () => {
+            // Add notes with a checked checkbox to the selectedNotes array
+            if (note_checkbox.checked) {
+                selectedNotes.push(note_id);
+            }
+            // Remove notes with an unchecked checkbox (that were previously checked) from the selectedNotes array
+            else if (!note_checkbox.checked) {
+                selectedNotes.splice(selectedNotes.indexOf(note_id), 1);
+            }
 
-        // Populate the #selected-notes input element with the selectedNotes array for use when associating notes with tags
-        selectedNotesInput.value = selectedNotes;
+            // Populate the #selected-notes input element with the selectedNotes array for use when associating notes with tags
+            selectedNotesInput.value = selectedNotes;
 
-        // Change href on the modal dialog (confirm deletion) to enable the deletion of selected notes
-        confirmDelete.href = "/notes?del=" + selectedNotes;
-        
-        // Variable to make sure the selected note counter says "note" when it's only one and "notes" when it's more than one
-        let s = "";
+            // Change href on the modal dialog (confirm deletion) to enable the deletion of selected notes
+            confirmDelete.href = "/notes?del=" + selectedNotes;
+            
+            // Variable to make sure the selected note counter says "note" when it's only one and "notes" when it's more than one
+            let s = "";
 
-        // Trigger the selected note counter toast 
-        if (selectedNotes.length > 0) {
-            selectedNotesCounter.classList.remove("invisible");
-            // If there are multiple notes selected, add an s at the end of the word "note". Otherwise, don't do that
-            if (selectedNotes.length > 1) {
-                s = "s";
+            // Trigger the selected note counter toast 
+            if (selectedNotes.length > 0) {
+                selectedNotesCounter.classList.remove("invisible");
+                // If there are multiple notes selected, add an s at the end of the word "note". Otherwise, don't do that
+                if (selectedNotes.length > 1) {
+                    s = "s";
+                }
+                else {
+                    s = "";
+                }
+                selectedNotesCounterText.innerHTML = selectedNotes.length + " note" + s + " selected";
+                modalBody.innerHTML = "Are you sure you want to delete " + selectedNotes.length + " note" + s + "?<br>This action can't be undone!";
             }
             else {
-                s = "";
+                selectedNotesCounter.classList.add("invisible");
             }
-            selectedNotesCounterText.innerHTML = selectedNotes.length + " note" + s + " selected";
-            modalBody.innerHTML = "Are you sure you want to delete " + selectedNotes.length + " note" + s + "?<br>This action can't be undone!";
-        }
-        else {
-            selectedNotesCounter.classList.add("invisible");
-        }
-    });
-}
+        });
+    }
 
-// Make sure the user doesn't accidentally click out of the page when selecting a note or notes
-var leavingConfirmed = false; // By default, warn the user when leaving the page when one or more notes are selected unless confrimed
-confirmLeave.forEach(dontWarn)
-function dontWarn(item) {
-    item.addEventListener("click", () => {
-        leavingConfirmed = true;
-    })
-}
-window.onbeforeunload = function() {
-    // Only warn the user if they have notes selected and if the leavingConfirmed variable is false
-    if (!leavingConfirmed) {
-        if (selectedNotes.length > 0) {
-            return "You currently have a note or more selected. Are you sure you want to leave?";
+    // Make sure the user doesn't accidentally click out of the page when selecting a note or notes
+    var leavingConfirmed = false; // By default, warn the user when leaving the page when one or more notes are selected unless confrimed
+    confirmLeave.forEach(dontWarn)
+    function dontWarn(item) {
+        item.addEventListener("click", () => {
+            leavingConfirmed = true;
+        });
+    }
+    window.onbeforeunload = function() {
+        // Only warn the user if they have notes selected and if the leavingConfirmed variable is false
+        if (!leavingConfirmed) {
+            if (selectedNotes.length > 0) {
+                return "You currently have a note or more selected. Are you sure you want to leave?";
+            }
         }
     }
-}
 
-// Show/hide the note sorting/filtering/searching options when clicking the respective button
-let displayModes = ["none", "inline"];
-let numberOfSortClicks = 0;
-let numberOfFilterClicks = 0;
-let numberOfSearchClicks = 0;
+    // Show/hide the note sorting/filtering/searching options when clicking the respective button
+    let displayModes = ["none", "inline"];
+    let numberOfSortClicks = 0;
+    let numberOfFilterClicks = 0;
+    let numberOfSearchClicks = 0;
 
-if (showSortButton) { // Prevents "Uncaught TypeError: showSortButton is null" in case the user visits /notes with no notes in their database
-    showSortButton.addEventListener("click", () => {
-        numberOfSortClicks++;
-        numberOfFilterClicks = 0;
-        numberOfSearchClicks = 0;
-        sortNotesContainer.style.display = displayModes[numberOfSortClicks % 2];
-        filterNotesContainer.style.display = "none";
-        searchNotesContainer.style.display = "none";
-    });
-    showFilterButton.addEventListener("click", () => {
-        numberOfSortClicks = 0;
-        numberOfFilterClicks++;
-        numberOfSearchClicks = 0;
-        sortNotesContainer.style.display = "none";
-        filterNotesContainer.style.display = displayModes[numberOfFilterClicks % 2];
-        searchNotesContainer.style.display = "none";
-    });
-    showSearchButton.addEventListener("click", () => {
-        numberOfSortClicks = 0;
-        numberOfFilterClicks = 0;
-        numberOfSearchClicks++;
-        sortNotesContainer.style.display = "none";
-        filterNotesContainer.style.display = "none";
-        searchNotesContainer.style.display = displayModes[numberOfSearchClicks % 2];
-    });
-}
+    if (showSortButton) { // Prevents "Uncaught TypeError: showSortButton is null" in case the user visits /notes with no notes in their database
+        showSortButton.addEventListener("click", () => {
+            numberOfSortClicks++;
+            numberOfFilterClicks = 0;
+            numberOfSearchClicks = 0;
+            sortNotesContainer.style.display = displayModes[numberOfSortClicks % 2];
+            filterNotesContainer.style.display = "none";
+            searchNotesContainer.style.display = "none";
+        });
+        showFilterButton.addEventListener("click", () => {
+            numberOfSortClicks = 0;
+            numberOfFilterClicks++;
+            numberOfSearchClicks = 0;
+            sortNotesContainer.style.display = "none";
+            filterNotesContainer.style.display = displayModes[numberOfFilterClicks % 2];
+            searchNotesContainer.style.display = "none";
+        });
+        showSearchButton.addEventListener("click", () => {
+            numberOfSortClicks = 0;
+            numberOfFilterClicks = 0;
+            numberOfSearchClicks++;
+            sortNotesContainer.style.display = "none";
+            filterNotesContainer.style.display = "none";
+            searchNotesContainer.style.display = displayModes[numberOfSearchClicks % 2];
+        });
+    }
 
-// Array for keeping track of the tags selected in the "add selected note(s) to tag(s)" modal dialog
-let selectedModalTags = [];
+    // Array for keeping track of the tags selected in the "add selected note(s) to tag(s)" modal dialog
+    let selectedModalTags = [];
 
-// Add selected modal tags to the array and remove deselected ones
-modalTags.forEach(modalTagSelector)
-function modalTagSelector(modalTagContainer) {
-    const tagInput = modalTagContainer.querySelector("input");
-    const tagLabel = modalTagContainer.querySelector("label");
-    tagInput.addEventListener("input", () => {
-        if (tagInput.checked == true) {
-            selectedModalTags.push(tagLabel.innerHTML);
-        }
-        else {
-            selectedModalTags.splice(selectedModalTags.indexOf(tagLabel.innerHTML), 1);
-        }
-        selectedModalTagsInput.value = selectedModalTags;
-        console.log(selectedModalTagsInput.value)///
-    });
-}
-
+    // Add selected modal tags to the array and remove deselected ones
+    modalTags.forEach(modalTagSelector)
+    function modalTagSelector(modalTagContainer) {
+        const tagInput = modalTagContainer.querySelector("input");
+        const tagLabel = modalTagContainer.querySelector("label");
+        tagInput.addEventListener("input", () => {
+            if (tagInput.checked == true) {
+                selectedModalTags.push(tagLabel.innerHTML);
+            }
+            else {
+                selectedModalTags.splice(selectedModalTags.indexOf(tagLabel.innerHTML), 1);
+            }
+            selectedModalTagsInput.value = selectedModalTags;
+        });
+    }
+});

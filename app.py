@@ -2,7 +2,7 @@ import re
 import sqlite3
 
 from datetime import datetime
-from flask import flash, Flask, redirect, render_template, request, session, url_for
+from flask import flash, Flask, redirect, render_template, request, send_file, session, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -125,13 +125,79 @@ def index():
         return render_template("index.html", editing_mode=bool(note_id), logged_in=logged_in)
 
 
+@app.route("/account", methods=["GET", "POST"])
+@login_required
+def account():
+    # User reached route via POST
+    if request.method == "POST":
+        operation = request.form.get("operation") # What the user requested
+        # If the requested operation is to change the password
+        if operation == "change-password":
+            # Receive the required information
+            old_password = request.form.get("old-password")
+            password = request.form.get("password")
+            confirmation = request.form.get("confirmation")
+
+            # Read the user's old password hash from the users database
+            user_hash = sql("users.db", 
+                            """
+                            SELECT hash
+                            FROM users
+                            WHERE username = ?
+                            """, (session["username"],)).fetchone()[0]
+            
+            # Compare the old password hash to the old password the user just entered
+            if check_password_hash(user_hash, old_password):
+                # Check if the password is valid
+                if not password:
+                    return apologize("/account", "Please enter a valid password.")
+                
+                # Check if the password contains at least an uppercase letter, at lease a lowercase letter,
+                # at lease a number, and is at least 8 characters long
+                if not re.fullmatch("^((?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,})$", password):
+                    return apologize("/account", "Please enter a valid password.")
+                
+                # Check if the confirmation matches the password
+                if confirmation != password:
+                    return apologize("/account", "The passwords don't match.")
+                
+                # After all checks pass, update the user's password hash
+                sql("users.db", 
+                    """
+                    UPDATE users
+                    SET hash = ?
+                    WHERE username = ?
+                    """, (generate_password_hash(password), session["username"],))
+                flash("Password changed successfully.")
+            
+            # If the old password the user just entered doesn't match the stored password hash, apologize
+            else:
+                return apologize("/account", "The old password you entered is invalid.")
+        
+        # If the requested operation is to download the database
+        elif operation == "db-download":
+            password = request.form.get("password")
+            user_hash = sql("users.db", 
+                            """
+                            SELECT hash
+                            FROM users
+                            WHERE username = ?
+                            """, (session["username"],)).fetchone()[0]
+            if check_password_hash(user_hash, password):
+                return send_file(f"./databases/{session['username']}-notes.db")
+            else:
+                return apologize("/account", "The password you entered is invalid.")
+
+    return render_template("account.html")
+
+
 # Route for autosaving notes as the user types
 @app.route("/autosave", methods=["POST"])
 @login_required
 def autosave():
     # Getting the necessary data
     results = request.get_json()
-    date_created = datetime.now().replace(microsecond=0) # TODO
+    date_created = datetime.now().replace(microsecond=0)
     date_modified = datetime.now().replace(microsecond=0)
     note_id = results.get("note_id")
     note_title = results.get("note_title")
@@ -240,6 +306,11 @@ def autosave():
     return "", 204
 
 
+@app.route("/help")
+def help():
+    return render_template("help.html")
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     # User reached route via GET
@@ -328,8 +399,6 @@ def mytags():
                ORDER BY tag_title COLLATE NOCASE ASC
                """).fetchall()
     
-    print(tags, "TAGSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")###
-    
     # A dict where each key is a tag title and each value is a list containing all notes linked with that tag (dict currently empty, will be populated below)
     tags_dict = {}
 
@@ -415,7 +484,6 @@ def notes():
                 filtered_by += i + ", "
             filtered_by = filtered_by[:-2] + "."
             filter_information = f"Your notes are filtered by the following tags: {filtered_by} Only notes linked with the aforementioned tag(s) are displayed."
-        
 
         # Dictionary used to modify the SQL query when sorting notes
         sort_dict = {
@@ -464,14 +532,6 @@ def notes():
                 ORDER BY {sort_dict[sort]}
                 """, tuple(filter.keys()) if filter else search_tuple).fetchall()
         return notes
-    # else:
-    #     def get_notes():
-    #         notes = sql(f"./databases/{session.get('username')}-notes.db", f"""
-    #                 SELECT note_id, note_title, note_body, bg_color, date_created, date_modified
-    #                 FROM notes
-    #                 ORDER BY {sort_dict[sort]}
-    #                 """).fetchall()
-    #         return notes
     
     # Delete any existing empty notes
     for note in get_notes():
@@ -505,7 +565,6 @@ def signup():
             login_url = url_for("login")
             return render_template("signup.html", login_url=login_url)
 
-
     # User reached route via POST
     if request.method == "POST":
         # Receive the user's information
@@ -514,7 +573,7 @@ def signup():
         confirmation = request.form.get("confirmation")
 
         # Check if the username is valid
-        if not username:
+        if not username or len(username) > 20 or not re.fullmatch("^[a-zA-Z0-9_]*$", username):
             return apologize("signup", "Please enter a valid username.")
         
         # Check if the password is valid
@@ -648,8 +707,6 @@ def tags():
                 """, (tag_id,))
             cur.execute("COMMIT;")
 
-
-
     # Otherwise, if the requested operation is something else, do the following
     else:
         # Creating tags and adding notes to them
@@ -660,17 +717,17 @@ def tags():
         selected_notes = request.form.get("selected-notes")
         if selected_notes: selected_notes = selected_notes.split(",")
         
-
         # Initially, the tag_list is empty
         tags_list = []
 
         # If the new tags are alphanumeric and are separated by spaces, find all regex matches to get a list of just the tags
         try:
-            if tag_title and len(tag_title) < 21:
+            if tag_title:
                 if tag_title.replace(" ", "").isalnum():
                     tags_list = re.findall("(\w+)[^ ]*", tag_title)
-            elif len(tag_title) > 20:
-                return apologize(source, "Tag titles can't be longer than 20 characters.")
+            for i in tags_list:
+                if len(i) > 20:
+                    return apologize(source, "Tag titles can't be longer than 20 characters.")
             
         except TypeError: # Prevents "TypeError: object of type 'NoneType' has no len()"
             pass
@@ -720,7 +777,6 @@ def tags():
         except sqlite3.IntegrityError:
             return apologize(source, "This note has already been added to that tag.")
         
-
         # Removing a note from a tag when the tag is clicked when the note is open in the editor
         if request.is_json:
             results = request.get_json()
