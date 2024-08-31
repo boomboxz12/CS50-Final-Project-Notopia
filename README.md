@@ -85,4 +85,4 @@ That's about all you need to know to use *Notopia*, the clean and simple web-bas
 
 I hope the above "Behind the scenes" section explains how *Notopia* works as clearly and cleanly as possible.
 
-This app was created by me (and me alone!) in 2024 for the ***CS50x 2024 Final Project***. Wish me luck!
+This app was created with love by me (Ahmed Mansour) in 2024 for the ***CS50x 2024 Final Project***. Wish me luck!
